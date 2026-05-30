@@ -1,0 +1,120 @@
+╔══════════════════════════════════════════════════════════╗
+║           তোমার কাজ — Step by Step                      ║
+╚══════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ JOB 1 — Files Replace করো
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ZIP থেকে এই files তোমার project এ copy করো:
+
+  call_screen.dart    → lib/screens/call_screen.dart
+  story_screen.dart   → lib/screens/story_screen.dart
+  pubspec.yaml        → pubspec.yaml (root এ)
+
+তারপর terminal:
+  flutter pub get
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ JOB 2 — Agora Console Fix (CALL FIX)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  এটা না করলে call কখনো কাজ করবে না!
+
+1. Browser এ যাও: console.agora.io
+2. Login করো
+3. তোমার project "cousin-hub" select করো
+4. Edit বাটনে click করো
+5. "App Certificate" section খোঁজো
+6. DISABLE করো (Testing Mode এ রাখো)
+7. Save করো
+
+এরপর call কাজ করবে! ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ JOB 3 — APK Size কমাও (250MB → ~35MB)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Terminal এ এই command দিয়ে build করো:
+
+  flutter build apk --release --split-per-abi
+
+এটা 3টা আলাদা APK বানাবে:
+  app-arm64-v8a-release.apk    ← এটা share করো (35-45MB)
+  app-armeabi-v7a-release.apk
+  app-x86_64-release.apk
+
+শুধু arm64 APK share করো — সব modern phone এ চলবে।
+
+আগের মতো শুধু "flutter build apk" করলে 250MB হয়
+কারণ সব architecture একসাথে থাকে।
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ JOB 4 — Firebase Rules Update করো
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Firebase Console → cousin-hub → Realtime Database → Rules:
+
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null"
+  }
+}
+
+Publish করো।
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ JOB 5 — App Icon Add করো
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. একটা 1024x1024 PNG icon বানাও
+   (canva.com তে "App Icon" template আছে)
+
+2. project এ folder বানাও:
+   assets/icon/app_icon.png
+
+3. pubspec.yaml এ এই lines uncomment করো:
+
+   dev_dependencies:
+     flutter_launcher_icons: ^0.14.1
+
+   flutter_icons:
+     android: true
+     ios: false
+     image_path: "assets/icon/app_icon.png"
+     min_sdk_android: 21
+
+4. Terminal:
+   flutter pub get
+   dart run flutter_launcher_icons
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ JOB 6 — Admin Set করো
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Firebase Console → Authentication → Users
+তোমার email এর UID copy করো
+
+Firebase Console → Realtime Database:
+users → {তোমার UID} → role → "admin"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ JOB 7 — APK Share করো
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+2. Google Drive এ upload করো
+3. Link copy করো
+4. Firebase → appConfig → updateUrl তে paste করো
+5. Cousins দের WhatsApp এ APK link পাঠাও
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ✅ DONE হলে কী পাবে
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Calls কাজ করবে (voice + video)
+✅ APK size ~35MB হবে
+✅ Stories — photo/video(1min)/text + editor
+✅ Ludo King — WebView + Firebase mode
+✅ সব features home এ দেখা যাবে
