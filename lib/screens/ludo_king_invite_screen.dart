@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -226,7 +227,7 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
                         Expanded(child: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white))),
                         Icon(sel ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
                           color: sel ? AppTheme.primary : Colors.grey, size: 24),
-                      ]));
+                      ])));
                 })),
 
         Container(
