@@ -7,6 +7,7 @@ import 'dart:async';
 import '../app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/cache_service.dart';
+import 'ludo_king_match_screen.dart';
 
 // ══════════════════════════════════════════════════════════
 // LUDO MENU — Choose mode
@@ -46,6 +47,16 @@ class LudoMenuScreen extends StatelessWidget {
           tags: const ['✅ In-app', '✅ Real-time', '✅ No extra app needed'],
           color: const Color(0xFF43A047),
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LudoInviteScreen(mode: 'firebase'))),
+        ),
+        const SizedBox(height: 14),
+
+        // Option 3 — Ludo King Official (bot server + deep link)
+        _ModeCard(
+          emoji: '👑', title: 'Ludo King (Official)',
+          desc: 'Bot automatically creates room — cousins join via deep link. Bot leaves when host arrives.',
+          tags: const ['✅ Official app', '✅ Auto room', '✅ Bot leaves on host join'],
+          color: const Color(0xFFE91E63),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LudoKingMatchScreen())),
         ),
         const Spacer(),
         const Text('উভয় mode এ invitation → notification → auto join',

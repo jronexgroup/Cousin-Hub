@@ -59,19 +59,22 @@ class NotificationService {
     required String toUid,
     required String title,
     required String body,
+    Map<String, dynamic>? data,
   }) async {
     try {
       final snap = await _db.ref('users/$toUid/fcmToken').get();
       if (!snap.exists) return;
       final token = snap.value as String;
-      await _db.ref('notifications').push().set({
+      final notif = <String, dynamic>{
         'toUid': toUid,
         'toToken': token,
         'title': title,
         'body': body,
         'sent': false,
         'timestamp': ServerValue.timestamp,
-      });
+      };
+      if (data != null) notif['data'] = data;
+      await _db.ref('notifications').push().set(notif);
     } catch (e) {
       print('Notification error: $e');
     }
@@ -81,15 +84,18 @@ class NotificationService {
     required String title,
     required String body,
     String? fromUid,
+    Map<String, dynamic>? data,
   }) async {
-    await _db.ref('notifications').push().set({
+    final notif = <String, dynamic>{
       'toAll': true,
       'title': title,
       'body': body,
       'fromUid': fromUid ?? '',
       'sent': false,
       'timestamp': ServerValue.timestamp,
-    });
+    };
+    if (data != null) notif['data'] = data;
+    await _db.ref('notifications').push().set(notif);
   }
 }
 

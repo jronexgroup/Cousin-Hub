@@ -5,6 +5,7 @@ import '../app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/cache_service.dart';
 import 'ludo_webview_screen.dart'; // <-- new file
+import 'ludo_king_match_screen.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -104,7 +105,7 @@ class _GamesScreenState extends State<GamesScreen> {
           tag: 'Official',
           tagColor: Colors.amber,
           onPlay: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const LudoWebScreen())),
+            MaterialPageRoute(builder: (_) => const LudoKingMatchScreen())),
         ),
 
         _GameCard(icon: '🧠', title: 'Quiz Battle',

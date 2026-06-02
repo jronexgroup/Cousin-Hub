@@ -15,6 +15,7 @@ import 'games_screen.dart';
 import 'members_screen.dart';
 import 'admin_screen.dart';
 import 'ludo_screen.dart';
+import 'ludo_match_lobby_screen.dart';
 import 'story_screen.dart';
 import 'racer_game.dart';
 import 'badges_screen.dart';
@@ -125,6 +126,22 @@ class _HomeScreenState extends State<HomeScreen> {
         onDecline: () async {
           await FirebaseDatabase.instance.ref('ludoRooms/$roomId/players/$uid/status').set('declined');
           await FirebaseDatabase.instance.ref('ludoInvites/$uid/$roomId').remove();
+        });
+    });
+
+    // Ludo King Official invites
+    FirebaseDatabase.instance.ref('ludoKingInvites/$uid').onChildAdded.listen((e) {
+      if (!e.snapshot.exists || !mounted) return;
+      final inv = Map<String, dynamic>.from(e.snapshot.value as Map);
+      final matchId = inv['matchId'] as String? ?? e.snapshot.key ?? '';
+      _showInviteDialog('👑', inv['hostName'] ?? 'Cousin', 'Ludo King Official 🎲',
+        onAccept: () async {
+          await FirebaseDatabase.instance.ref('ludoKingInvites/$uid/$matchId').remove();
+          if (mounted) Navigator.push(context, MaterialPageRoute(
+            builder: (_) => LudoMatchLobbyScreen(matchId: matchId, isHost: false)));
+        },
+        onDecline: () async {
+          await FirebaseDatabase.instance.ref('ludoKingInvites/$uid/$matchId').remove();
         });
     });
 
