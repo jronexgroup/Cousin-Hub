@@ -20,13 +20,26 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
   final List<String> _sel = [];
   bool _loading = false;
   bool _roomCreated = false;
+  bool _listeningForCode = false;
   String _myUid = '', _myName = '', _myPhoto = '';
   String _roomCode = '', _matchId = '', _deepLink = '';
+  StreamSubscription<DatabaseEvent>? _codeSub;
+
+  @override
+  void dispose() {
+    _codeSub?.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     _init();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _roomCreated ? _roomCreatedView() : _inviteView();
   }
 
   Future<void> _init() async {
@@ -113,15 +126,26 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
       'delivered': true,
     });
 
-    setState(() { _loading = false; _roomCreated = true; });
+    setState(() {
+      _loading = false;
+      _roomCreated = true;
+      _listenForBotCode();
+    });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_roomCreated) {
-      return _roomCreatedView();
-    }
-    return _inviteView();
+  void _listenForBotCode() {
+    if (_listeningForCode || _matchId.isEmpty) return;
+    _listeningForCode = true;
+    _codeSub = _db.ref('ludoKingMatches/$_matchId').onValue.listen((e) {
+      if (!e.snapshot.exists || !mounted) return;
+      final data = Map<String, dynamic>.from(e.snapshot.value as Map);
+      if (data['roomCode'] != null && data['deepLink'] != null) {
+        setState(() {
+          _roomCode = data['roomCode'] as String? ?? '';
+          _deepLink = data['deepLink'] as String? ?? '';
+        });
+      }
+    });
   }
 
   Widget _inviteView() {
@@ -218,19 +242,8 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
     );
   }
 
+  // ── Match Created View (waiting for bot or showing room code) ──
   Widget _roomCreatedView() {
-    // Listen for bot to write the room code
-    _db.ref('ludoKingMatches/$_matchId').onValue.listen((e) {
-      if (!e.snapshot.exists || !mounted) return;
-      final data = Map<String, dynamic>.from(e.snapshot.value as Map);
-      if (data['roomCode'] != null && data['deepLink'] != null) {
-        setState(() {
-          _roomCode = data['roomCode'] as String? ?? '';
-          _deepLink = data['deepLink'] as String? ?? '';
-        });
-      }
-    });
-
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
@@ -330,7 +343,7 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   padding: const EdgeInsets.symmetric(vertical: 14)),
                 child: Text('📋 Copy Invite Link',
-                  style: const TextStyle(color: Color(0xFF7C3AED), fontWeight: FontWeight.w800))),
+                  style: const TextStyle(color: Color(0xFF7C3AED), fontWeight: FontWeight.w800)))),
 
             const SizedBox(height: 16),
           ],

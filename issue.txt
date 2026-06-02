@@ -1,0 +1,518 @@
+Analyzing Cousin-Hub...
+
+warning • Unused import: 'package:shared_preferences/shared_preferences.dart'. Try removing the import directive •
+       lib/main.dart:4:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/admin_screen.dart:105:57 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/admin_screen.dart:129:41 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/admin_screen.dart:130:47 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/admin_screen.dart:131:47 • curly_braces_in_flow_control_structures
+warning • Unused import: 'dart:math'. Try removing the import directive • lib/screens/archery_game.dart:4:8 • unused_import
+warning • Unused import: '../services/cache_service.dart'. Try removing the import directive •
+       lib/screens/archery_game.dart:8:8 • unused_import
+   info • The private field _scores could be 'final'. Try making the field 'final' • lib/screens/archery_game.dart:43:23 •
+          prefer_final_fields
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/archery_game.dart:54:31 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/badges_screen.dart:130:32 • deprecated_member_use
+   info • Unnecessary braces in a string interpolation. Try removing the braces • lib/screens/badges_screen.dart:157:41 •
+          unnecessary_brace_in_string_interps
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/badges_screen.dart:276:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/badges_screen.dart:281:51 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/badges_screen.dart:285:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/birthday_expense_screen.dart:51:65 •
+          deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form
+          field. This feature was deprecated after v3.33.0-1.0.pre. Try replacing the use of the deprecated member with the
+          replacement • lib/screens/birthday_expense_screen.dart:148:13 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/birthday_expense_screen.dart:165:24 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/birthday_expense_screen.dart:165:49 • curly_braces_in_flow_control_structures
+   info • Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use
+          with a 'mounted' check • lib/screens/birthday_expense_screen.dart:182:27 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/birthday_expense_screen.dart:263:57 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:83:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:91:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:111:40 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/call_screen.dart:182:7 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:212:83 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:238:34 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:241:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:241:66 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:245:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:245:69 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:249:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:255:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:255:69 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:258:82 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/call_screen.dart:261:76 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/call_screen.dart:289:18 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/call_screen.dart:292:24 • curly_braces_in_flow_control_structures
+warning • Unused import: 'call_screen.dart'. Try removing the import directive • lib/screens/chat_screen.dart:16:8 •
+       unused_import
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/chat_screen.dart:199:36 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/chat_screen.dart:200:34 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/chat_screen.dart:201:41 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/chat_screen.dart:202:32 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/chat_screen.dart:366:65 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/chat_screen.dart:459:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/chat_screen.dart:592:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/chat_screen.dart:645:63 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/chat_screen.dart:658:72 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/chat_screen.dart:760:76 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/chat_screen.dart:761:85 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/chat_screen.dart:762:10 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/chat_screen.dart:790:42 • deprecated_member_use
+warning • The value of the local variable 'members' isn't used. Try removing the variable or using it •
+       lib/screens/eidi_screen.dart:49:32 • unused_local_variable
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form
+          field. This feature was deprecated after v3.33.0-1.0.pre. Try replacing the use of the deprecated member with the
+          replacement • lib/screens/eidi_screen.dart:79:17 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/eidi_screen.dart:149:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/eidi_screen.dart:176:79 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/eidi_screen.dart:184:80 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/eidi_screen.dart:198:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/event_screen.dart:160:51 • deprecated_member_use
+warning • The value of the local variable 'lastLine' isn't used. Try removing the variable or using it •
+       lib/screens/family_storybook_screen.dart:133:23 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/family_storybook_screen.dart:140:65 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/family_storybook_screen.dart:154:75 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/family_storybook_screen.dart:278:47 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/family_storybook_screen.dart:293:65 •
+          deprecated_member_use
+warning • Unused import: 'dart:math'. Try removing the import directive • lib/screens/games_screen.dart:3:8 • unused_import
+warning • Unused import: '../services/auth_service.dart'. Try removing the import directive •
+       lib/screens/games_screen.dart:5:8 • unused_import
+warning • Unused import: 'ludo_webview_screen.dart'. Try removing the import directive • lib/screens/games_screen.dart:7:8 •
+       unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/games_screen.dart:79:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/games_screen.dart:179:53 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/home_screen.dart:140:24 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/home_screen.dart:198:18 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/home_screen.dart:264:63 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/home_screen.dart:297:63 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/home_screen.dart:311:67 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/home_screen.dart:390:49 • deprecated_member_use
+warning • A value for optional parameter 'key' isn't ever given. Try removing the unused parameter •
+       lib/screens/home_screen.dart:431:28 • unused_element_parameter
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/home_screen.dart:437:51 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/home_screen.dart:461:51 • deprecated_member_use
+warning • Unused import: '../services/cache_service.dart'. Try removing the import directive •
+       lib/screens/live_location_screen.dart:9:8 • unused_import
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/live_location_screen.dart:40:31 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/live_location_screen.dart:85:22 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/live_location_screen.dart:145:43 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/live_location_screen.dart:354:43 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/live_location_screen.dart:441:36 •
+          deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/login_screen.dart:47:20 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_declare_results_screen.dart:140:56 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_declare_results_screen.dart:149:47 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_declare_results_screen.dart:213:55 •
+          deprecated_member_use
+warning • Unused import: '../services/notification_service.dart'. Try removing the import directive •
+       lib/screens/ludo_king_invite_screen.dart:8:8 • unused_import
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/ludo_king_invite_screen.dart:35:31 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/ludo_king_invite_screen.dart:49:29 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/ludo_king_invite_screen.dart:50:31 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_king_invite_screen.dart:138:44 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_king_invite_screen.dart:140:63 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_king_invite_screen.dart:187:55 •
+          deprecated_member_use
+  error • Expected to find ')' • lib/screens/ludo_king_invite_screen.dart:205:26 • expected_token
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_king_invite_screen.dart:269:63 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_king_invite_screen.dart:284:67 •
+          deprecated_member_use
+  error • Too many positional arguments: 0 expected, but 1 found. Try removing the extra positional arguments, or specifying
+         the name for named arguments • lib/screens/ludo_king_invite_screen.dart:335:13 •
+         extra_positional_arguments_could_be_named
+  error • Expected to find ')' • lib/screens/ludo_king_invite_screen.dart:336:11 • expected_token
+warning • Unused import: 'package:url_launcher/url_launcher.dart'. Try removing the import directive •
+       lib/screens/ludo_king_match_screen.dart:3:8 • unused_import
+warning • Unused import: '../services/cache_service.dart'. Try removing the import directive •
+       lib/screens/ludo_king_match_screen.dart:6:8 • unused_import
+warning • Unused import: '../services/notification_service.dart'. Try removing the import directive •
+       lib/screens/ludo_king_match_screen.dart:7:8 • unused_import
+warning • Unused import: 'ludo_declare_results_screen.dart'. Try removing the import directive •
+       lib/screens/ludo_king_match_screen.dart:11:8 • unused_import
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/ludo_king_match_screen.dart:35:31 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_king_match_screen.dart:101:89 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_king_match_screen.dart:138:72 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_leaderboard_screen.dart:71:55 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_leaderboard_screen.dart:73:74 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_leaderboard_screen.dart:80:51 •
+          deprecated_member_use
+warning • Unused import: '../app_theme.dart'. Try removing the import directive •
+       lib/screens/ludo_match_history_screen.dart:3:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_match_lobby_screen.dart:109:65 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_match_lobby_screen.dart:115:63 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_match_lobby_screen.dart:127:59 •
+          deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_match_lobby_screen.dart:180:61 •
+          deprecated_member_use
+  error • Expected to find ')' • lib/screens/ludo_match_lobby_screen.dart:204:11 • expected_token
+  error • Expected to find ')' • lib/screens/ludo_match_lobby_screen.dart:222:9 • expected_token
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:82:22 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:84:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:97:50 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/ludo_screen.dart:123:31 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/ludo_screen.dart:137:29 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/ludo_screen.dart:138:31 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/ludo_screen.dart:181:22 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:221:79 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:223:98 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:264:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:334:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:341:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:363:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:364:54 • deprecated_member_use
+   info • Statements in a for should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/ludo_screen.dart:524:31 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:574:65 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:574:162 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:580:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:688:73 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:688:104 • deprecated_member_use
+warning • The left operand can't be null, so the right operand is never executed. Try removing the operator and the right
+       operand • lib/screens/ludo_screen.dart:699:44 • dead_null_aware_expression
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:707:228 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:707:258 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:713:228 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:720:374 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:725:409 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:725:532 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:740:188 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:743:138 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:743:244 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:746:547 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:752:75 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:753:120 • deprecated_member_use
+   info • Function literals shouldn't be passed to 'forEach'. Try using a 'for' loop • lib/screens/ludo_screen.dart:755:17 •
+          avoid_function_literals_in_foreach_calls
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:755:107 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:755:202 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:755:297 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:763:230 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:763:628 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:763:746 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:763:867 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:763:1020 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:764:305 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/ludo_screen.dart:765:229 • deprecated_member_use
+warning • Unused import: '../app_theme.dart'. Try removing the import directive • lib/screens/ludo_webview_screen.dart:3:8 •
+       unused_import
+warning • Unused import: 'call_screen.dart'. Try removing the import directive • lib/screens/members_screen.dart:6:8 •
+       unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/members_screen.dart:95:61 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use
+          with a 'mounted' check • lib/screens/memory_screen.dart:68:46 • use_build_context_synchronously
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/memory_screen.dart:102:18 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/memory_screen.dart:114:20 • curly_braces_in_flow_control_structures
+warning • The value of the local variable 'dir' isn't used. Try removing the variable or using it •
+       lib/screens/memory_screen.dart:117:13 • unused_local_variable
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/memory_screen.dart:123:20 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/memory_screen.dart:126:20 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/memory_screen.dart:219:28 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/memory_screen.dart:247:41 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/memory_screen.dart:255:26 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/memory_screen.dart:275:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/memory_screen.dart:372:35 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/photo_album_screen.dart:64:18 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/profile_screen.dart:62:20 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/profile_screen.dart:87:22 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/profile_screen.dart:91:20 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/profile_screen.dart:135:18 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/profile_screen.dart:149:19 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/profile_screen.dart:153:27 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/profile_screen.dart:187:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/profile_screen.dart:234:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/profile_screen.dart:247:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/profile_screen.dart:279:49 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/racer_game.dart:39:31 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/racer_game.dart:54:34 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/racer_game.dart:55:50 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/racer_game.dart:105:22 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/racer_game.dart:113:18 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:164:69 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:201:51 • deprecated_member_use
+warning • The value of the field '_myLane' isn't used. Try removing the field, or using it •
+       lib/screens/racer_game.dart:335:7 • unused_field
+warning • The value of the field '_worldOffset' isn't used. Try removing the field, or using it •
+       lib/screens/racer_game.dart:342:10 • unused_field
+warning • The value of the local variable 'playerTop' isn't used. Try removing the variable or using it •
+       lib/screens/racer_game.dart:507:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:657:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:702:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:724:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:729:75 • deprecated_member_use
+warning • The value of the local variable 'groundY' isn't used. Try removing the variable or using it •
+       lib/screens/racer_game.dart:763:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:803:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:807:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:838:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:892:65 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:924:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:981:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/racer_game.dart:981:81 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/register_screen.dart:33:20 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/splash_screen.dart:57:72 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/splash_screen.dart:82:49 • deprecated_member_use
+warning • Unused import: 'package:video_player/video_player.dart'. Try removing the import directive •
+       lib/screens/story_screen.dart:4:8 • unused_import
+warning • Unused import: '../services/cache_service.dart'. Try removing the import directive •
+       lib/screens/story_screen.dart:9:8 • unused_import
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/screens/story_screen.dart:36:31 • curly_braces_in_flow_control_structures
+   info • 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit
+          conversion. Try replacing the use of the deprecated member with the replacement •
+          lib/screens/story_screen.dart:179:26 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/story_screen.dart:227:59 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit
+          conversion. Try replacing the use of the deprecated member with the replacement •
+          lib/screens/story_screen.dart:349:85 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/story_screen.dart:607:45 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after
+          v3.31.0-2.0.pre. Try replacing the use of the deprecated member with the replacement •
+          lib/screens/voting_screen.dart:66:15 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use
+          of the deprecated member with the replacement • lib/screens/voting_screen.dart:118:61 • deprecated_member_use
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/auth_service.dart:15:7 •
+          avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/auth_service.dart:16:7 •
+          avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/auth_service.dart:17:7 •
+          avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/auth_service.dart:18:7 •
+          avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/auth_service.dart:22:9 •
+          avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/auth_service.dart:27:7 •
+          avoid_print
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/services/auth_service.dart:42:39 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/services/auth_service.dart:43:78 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/services/auth_service.dart:88:45 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/services/auth_service.dart:89:43 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/services/auth_service.dart:90:43 • curly_braces_in_flow_control_structures
+warning • Unused import: 'package:flutter/material.dart'. Try removing the import directive •
+       lib/services/call_service.dart:2:8 • unused_import
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/cloudinary_service.dart:22:7
+          • avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/cloudinary_service.dart:25:7
+          • avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/cloudinary_service.dart:41:7
+          • avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/cloudinary_service.dart:44:7
+          • avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/cloudinary_service.dart:62:7
+          • avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework •
+          lib/services/notification_service.dart:41:5 • avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework •
+          lib/services/notification_service.dart:79:7 • avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework •
+          lib/services/notification_service.dart:104:3 • avoid_print
+   info • Don't invoke 'print' in production code. Try using a logging framework • lib/services/update_service.dart:38:7 •
+          avoid_print
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/services/update_service.dart:84:30 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block •
+          lib/services/update_service.dart:112:28 • curly_braces_in_flow_control_structures
+   info • 'WillPopScope' is deprecated and shouldn't be used. Use PopScope instead. The Android predictive back feature will
+          not work with WillPopScope. This feature was deprecated after v3.12.0-1.0.pre. Try replacing the use of the
+          deprecated member with the replacement • lib/services/update_service.dart:136:12 • deprecated_member_use
+
+243 issues found. (ran in 40.4s)
+root@localhost:~/projects/Cousin-Hub#

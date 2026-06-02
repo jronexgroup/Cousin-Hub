@@ -200,7 +200,7 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   padding: const EdgeInsets.symmetric(vertical: 12)),
                 child: Text('🚪 Bot Leave Room (so bot can serve others)',
-                  style: TextStyle(color: Colors.orange.shade300, fontSize: 12, fontWeight: FontWeight.w800))),
+                  style: TextStyle(color: Colors.orange.shade300, fontSize: 12, fontWeight: FontWeight.w800)))),
           ] else if (!hasRoom) ...[
             const SizedBox(height: 10),
             const Text('⏳ Room code will appear here once the bot creates it',
@@ -215,10 +215,10 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
                 side: BorderSide(color: hasRoom && joined >= 2 ? Colors.green : Colors.grey.shade700, width: 1.5),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 padding: const EdgeInsets.symmetric(vertical: 14)),
-              child: Text(hasRoom && joined >= 2 ? '🏁 Declare Results (after match)' : 'Wait for players & bot...',
-                style: TextStyle(
-                  color: hasRoom && joined >= 2 ? Colors.green : Colors.grey.shade600,
-                  fontWeight: FontWeight.w800))),
+                child: Text(hasRoom && joined >= 2 ? '🏁 Declare Results (after match)' : 'Wait for players & bot...',
+                  style: TextStyle(
+                    color: hasRoom && joined >= 2 ? Colors.green : Colors.grey.shade600,
+                    fontWeight: FontWeight.w800)))),
         ] else ...[
           if (!hasRoom) ...[
             const SizedBox(height: 8),
