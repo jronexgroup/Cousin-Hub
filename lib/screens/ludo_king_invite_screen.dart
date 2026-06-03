@@ -25,10 +25,13 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
   String _myUid = '', _myName = '', _myPhoto = '';
   String _roomCode = '', _matchId = '', _deepLink = '';
   StreamSubscription<DatabaseEvent>? _codeSub;
+  bool _manualMode = false;
+  final _codeController = TextEditingController();
 
   @override
   void dispose() {
     _codeSub?.cancel();
+    _codeController.dispose();
     super.dispose();
   }
 
@@ -243,6 +246,24 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
     );
   }
 
+  void _launchLudoKingApp() {
+    launchUrl(Uri.parse('https://lk.gggred.com/'), mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _submitManualCode() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty || _matchId.isEmpty) return;
+    final deepLink = 'https://lk.gggred.com/?rmc=$code&gt=0&po=0';
+    await _db.ref('ludoKingMatches/$_matchId').update({
+      'roomCode': code,
+      'deepLink': deepLink,
+    });
+    setState(() {
+      _roomCode = code;
+      _deepLink = deepLink;
+    });
+  }
+
   // ── Match Created View (waiting for bot or showing room code) ──
   Widget _roomCreatedView() {
     return Scaffold(
@@ -268,10 +289,74 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
             style: const TextStyle(color: Colors.white54, fontSize: 13)),
           const SizedBox(height: 24),
 
-          if (_roomCode.isEmpty)
-            const Padding(padding: EdgeInsets.symmetric(vertical: 20),
-              child: SizedBox(width: 40, height: 40,
-                child: CircularProgressIndicator(color: Color(0xFF7C3AED)))),
+          if (_roomCode.isEmpty && !_manualMode)
+            Column(children: [
+              const SizedBox(width: 40, height: 40,
+                child: CircularProgressIndicator(color: Color(0xFF7C3AED))),
+              const SizedBox(height: 20),
+              OutlinedButton.icon(
+                onPressed: () => setState(() => _manualMode = true),
+                icon: const Icon(Icons.gamepad, color: Color(0xFF7C3AED)),
+                label: const Text('🎮 Create Room Manually',
+                  style: TextStyle(color: Color(0xFF7C3AED), fontWeight: FontWeight.w800)),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20)),
+              ),
+            ]),
+
+          if (_roomCode.isEmpty && _manualMode)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1A2E),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.4))),
+              child: Column(children: [
+                const Text('Open Ludo King and create a room, then paste the room code below.',
+                  style: TextStyle(color: Colors.white70, fontSize: 12), textAlign: TextAlign.center),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _launchLudoKingApp,
+                    icon: const Icon(Icons.open_in_new, color: Color(0xFF7C3AED)),
+                    label: const Text('Open Ludo King',
+                      style: TextStyle(color: Color(0xFF7C3AED), fontWeight: FontWeight.w800)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                      padding: const EdgeInsets.symmetric(vertical: 12)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _codeController,
+                  style: const TextStyle(color: Colors.white, fontSize: 18, letterSpacing: 4),
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: 'Paste room code here',
+                    hintStyle: const TextStyle(color: Colors.white30, fontSize: 14),
+                    filled: true,
+                    fillColor: const Color(0xFF0A0A1A),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF7C3AED))),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 2)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppTheme.gradientButton(
+                    label: '✅ Submit Room Code',
+                    onTap: _submitManualCode,
+                    height: 48),
+                ),
+              ])),
 
           if (_roomCode.isNotEmpty) ...[
             Container(
