@@ -15,6 +15,7 @@ import 'games_screen.dart';
 import 'members_screen.dart';
 import 'admin_screen.dart';
 import 'ludo_screen.dart';
+import 'ludo_king_invite_screen.dart';
 import 'ludo_match_lobby_screen.dart';
 import 'story_screen.dart';
 import 'racer_game.dart';
@@ -335,7 +336,7 @@ class _HomeBody extends StatelessWidget {
         _sectionHeader('Games Zone 🎮'),
         const SizedBox(height: 10),
         _grid(context, [
-          _Card('🎲', 'Ludo',      const Color(0xFF1A0A2E), () => _go(context, const LudoGameScreen(roomId: '')), light: false),
+          _Card('🎲', 'Ludo',      const Color(0xFF1A0A2E), () => _go(context, const LudoKingInviteScreen()), light: false),
           _Card('🏃', 'Racer',     const Color(0xFF0D1B0D), () => _go(context, const RacerLobbyScreen()), light: false),
           _Card('🏹', 'Archery',   const Color(0xFF1A0808), () => _go(context, const ArcheryGameScreen()), light: false),
           _Card('🧠', 'Quiz',      const Color(0xFFEDE9FE), () => _go(context, const GamesScreen())),

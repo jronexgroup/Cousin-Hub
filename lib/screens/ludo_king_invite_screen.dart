@@ -67,8 +67,74 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
     else if (_sel.length < 4) _sel.add(uid);
   });
 
+  Future<String?> _showMethodDialog() async {
+    if (!mounted) return null;
+    return showDialog<String>(context: context, builder: (ctx) => Dialog(
+      backgroundColor: const Color(0xFF1A1A2E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Text('🎮', style: TextStyle(fontSize: 48)),
+        const SizedBox(height: 8),
+        const Text('Choose Room Creation Method', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+        const SizedBox(height: 4),
+        const Text('How will the Ludo King room be created?', style: TextStyle(color: Colors.white54, fontSize: 12)),
+        const SizedBox(height: 20),
+
+        // Manual — primary
+        GestureDetector(
+          onTap: () => Navigator.pop(ctx, 'manual'),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFF60A5FA)]),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [BoxShadow(color: const Color(0xFF7C3AED).withOpacity(0.4), blurRadius: 12)]),
+            child: const Row(children: [
+              Text('✍️', style: TextStyle(fontSize: 28)),
+              SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Manual (Recommended)', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900)),
+                SizedBox(height: 2),
+                Text('You create the room — just paste the code here', style: TextStyle(color: Colors.white70, fontSize: 11)),
+              ])),
+              Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+            ]),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Bot — secondary
+        GestureDetector(
+          onTap: () => Navigator.pop(ctx, 'bot'),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0A0A1A),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withOpacity(0.1))),
+            child: const Row(children: [
+              Text('🤖', style: TextStyle(fontSize: 28)),
+              SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Bot Automation', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900)),
+                SizedBox(height: 2),
+                Text('Bot creates room automatically on the server phone', style: TextStyle(color: Colors.white54, fontSize: 11)),
+              ])),
+              Icon(Icons.arrow_forward_ios_rounded, color: Colors.white38, size: 16),
+            ]),
+          ),
+        ),
+      ])),
+    ));
+  }
+
   Future<void> _createMatch() async {
     if (_sel.isEmpty) return;
+
+    // Show method selection dialog first
+    final method = await _showMethodDialog();
+    if (method == null || !mounted) return;
+
     setState(() => _loading = true);
 
     _matchId = 'ludoKing_${DateTime.now().millisecondsSinceEpoch}';
@@ -89,12 +155,13 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
       };
     }
 
-    // Match created without roomCode/deepLink — the bot will write them
     await _db.ref('ludoKingMatches/$_matchId').set({
       'hostUid': _myUid,
       'hostName': _myName,
       'status': 'waiting',
       'players': playersMap,
+      'creationMethod': method,
+      if (method == 'manual') 'botStatus': 'manual',
       'createdAt': ServerValue.timestamp,
     });
 
@@ -110,7 +177,9 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
         await _db.ref('notifications').push().set({
           'toToken': ts.value,
           'title': '🎮 $_myName invited you to Ludo King!',
-          'body': 'Bot is setting up the room — join now!',
+          'body': method == 'manual'
+              ? '$_myName is creating a room — join the lobby!'
+              : 'Bot is setting up the room — join now!',
           'data': {'matchId': _matchId},
           'sent': false,
           'timestamp': ServerValue.timestamp,
@@ -119,7 +188,7 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
     }
 
     await _db.ref('chats/main').push().set({
-      'text': '🎮 Ludo King Match Started!\n\nHost: $_myName\nPlayers: ${all.length}\n\nBot is creating the room — join the lobby!',
+      'text': '🎮 Ludo King Match Started!\n\nHost: $_myName\nPlayers: ${all.length}\n\n${method == 'manual' ? 'Host will share room code manually!' : 'Bot is creating the room — join the lobby!'}',
       'type': 'ludo_king_invite',
       'matchId': _matchId,
       'senderUid': _myUid,
@@ -133,7 +202,11 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
     setState(() {
       _loading = false;
       _roomCreated = true;
-      _listenForBotCode();
+      if (method == 'manual') {
+        _manualMode = true;
+      } else {
+        _listenForBotCode();
+      }
     });
   }
 
@@ -258,10 +331,9 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
       'roomCode': code,
       'deepLink': deepLink,
     });
-    setState(() {
-      _roomCode = code;
-      _deepLink = deepLink;
-    });
+    if (!mounted) return;
+    Navigator.pushReplacement(context,
+      MaterialPageRoute(builder: (_) => LudoMatchLobbyScreen(matchId: _matchId, isHost: true)));
   }
 
   // ── Match Created View (waiting for bot or showing room code) ──

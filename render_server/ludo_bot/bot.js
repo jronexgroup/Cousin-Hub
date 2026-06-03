@@ -127,7 +127,7 @@ class LudoKingBot {
 
   async _handleNewMatch(matchId, data) {
     // Only process matches that need a bot
-    if (!data || data.botStatus || data.status === "finished" || data.status === "cancelled") {
+    if (!data || data.botStatus || data.creationMethod === "manual" || data.status === "finished" || data.status === "cancelled") {
       return;
     }
 

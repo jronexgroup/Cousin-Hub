@@ -54,7 +54,10 @@ class _LudoKingMatchState extends State<LudoKingMatchScreen> {
 
   void _loadRecent() {
     _db.ref('ludoKingResults').orderByChild('date').limitToLast(10).onValue.listen((e) {
-      if (!e.snapshot.exists || !mounted) return;
+      if (!e.snapshot.exists || !mounted) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
       final list = (e.snapshot.value as Map).entries.map((en) {
         final m = Map<String, dynamic>.from(en.value as Map);
         m['id'] = en.key;

@@ -68,8 +68,10 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
     final total = players.length;
     final roomCode = _match['roomCode'] as String? ?? '';
     final botStatus = _match['botStatus'] as String? ?? '';
-    final hasRoom = roomCode.isNotEmpty && botStatus == 'in_room';
+    final creationMethod = _match['creationMethod'] as String? ?? 'bot';
+    final hasRoom = roomCode.isNotEmpty;
     final botLeft = botStatus == 'departed';
+    final isManual = creationMethod == 'manual';
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A1A),
@@ -98,8 +100,8 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
             gradient: const LinearGradient(colors: [Color(0xFF1A1A3E), Color(0xFF2D1B69)]),
             borderRadius: BorderRadius.circular(20)),
           child: Column(children: [
-            Text(hasRoom ? '👑' : botLeft ? '🚪' : '🤖', style: const TextStyle(fontSize: 44)),
-            Text(hasRoom ? '$joined/$total Joined' : botLeft ? 'Bot has left' : 'Waiting for bot...',
+            Text(hasRoom ? '👑' : botLeft ? '🚪' : isManual ? '✍️' : '🤖', style: const TextStyle(fontSize: 44)),
+            Text(hasRoom ? '$joined/$total Joined' : botLeft ? 'Bot has left' : isManual ? 'Host will create room' : 'Waiting for bot...',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
             const SizedBox(height: 8),
             if (hasRoom)
@@ -113,7 +115,11 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: Colors.amber.withOpacity(0.2), borderRadius: BorderRadius.circular(100)),
-                child: Text(botStatus == 'creating_room' ? '🔨 Creating room...' : '🤖 Bot will create room shortly',
+                child: Text(isManual
+                    ? '✍️ Host will create room and share code'
+                    : botStatus == 'creating_room'
+                        ? '🔨 Creating room...'
+                        : '🤖 Bot will create room shortly',
                   style: const TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.w700))),
           ])),
 
@@ -181,29 +187,31 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
               child: Text('$joined players joined! Go play in Ludo King!',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.green, fontSize: 13))),
-          if (hasRoom && !botLeft && joined >= 1) ...[
+          if (hasRoom && joined >= 1) ...[
             AppTheme.gradientButton(
               label: '👑 Open Ludo King & Join Room',
               onTap: _openLudoKing,
               height: 50),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  _db.ref('ludoKingMatches/${widget.matchId}').update({'botLeave': true});
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('🤖 Bot will leave the room'), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
-                },
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.orange.shade300, width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                  padding: const EdgeInsets.symmetric(vertical: 12)),
-                child: Text('🚪 Bot Leave Room (so bot can serve others)',
-                  style: TextStyle(color: Colors.orange.shade300, fontSize: 12, fontWeight: FontWeight.w800)))),
+            if (!isManual) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    _db.ref('ludoKingMatches/${widget.matchId}').update({'botLeave': true});
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('🤖 Bot will leave the room'), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.orange.shade300, width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                    padding: const EdgeInsets.symmetric(vertical: 12)),
+                  child: Text('🚪 Bot Leave Room (so bot can serve others)',
+                    style: TextStyle(color: Colors.orange.shade300, fontSize: 12, fontWeight: FontWeight.w800)))),
+            ],
           ] else if (!hasRoom) ...[
             const SizedBox(height: 10),
-            const Text('⏳ Room code will appear here once the bot creates it',
+            Text(isManual ? '✍️ Host will create room and share the code' : '⏳ Room code will appear here once the bot creates it',
               textAlign: TextAlign.center, style: TextStyle(color: Colors.white38, fontSize: 12)),
           ],
           const SizedBox(height: 8),
@@ -215,15 +223,15 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
                 side: BorderSide(color: hasRoom && joined >= 2 ? Colors.green : Colors.grey.shade700, width: 1.5),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: Text(hasRoom && joined >= 2 ? '🏁 Declare Results (after match)' : 'Wait for players & bot...',
+                child: Text(hasRoom && joined >= 2 ? '🏁 Declare Results (after match)' : isManual ? 'Wait for players...' : 'Wait for players & bot...',
                   style: TextStyle(
                     color: hasRoom && joined >= 2 ? Colors.green : Colors.grey.shade600,
                     fontWeight: FontWeight.w800)))),
         ] else ...[
           if (!hasRoom) ...[
             const SizedBox(height: 8),
-            const Text('Waiting for bot to create room...',
-              style: TextStyle(color: Colors.white54, fontSize: 13)),
+            Text(isManual ? 'Host will create room and share the code' : 'Waiting for bot to create room...',
+              style: const TextStyle(color: Colors.white54, fontSize: 13)),
           ],
           if (hasRoom) ...[
             const SizedBox(height: 8),
