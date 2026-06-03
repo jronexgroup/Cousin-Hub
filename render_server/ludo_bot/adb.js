@@ -2,7 +2,21 @@ const { execSync, exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
-const sharp = require("sharp");
+
+// Sharp loading with WASM fallback (needed on Termux/Android)
+let sharp;
+try {
+  sharp = require("sharp");
+} catch (e) {
+  try {
+    require("@img/sharp-wasm32");
+    sharp = require("sharp");
+  } catch (e2) {
+    console.error("❌ sharp library failed to load. On Termux, run: npm install --os=linux");
+    throw new Error(`sharp load error: ${e2.message}`);
+  }
+}
+
 const Tesseract = require("tesseract.js");
 
 const TMP = path.join(os.tmpdir(), "ludo_bot");
@@ -48,6 +62,22 @@ class Adb {
     if (!this.serial) throw new Error(`Device ${ip} not found in adb devices`);
     console.log(`✅ ADB connected: ${this.serial}`);
     return this.serial;
+  }
+
+  // Auto-connect for same-device mode (Termux).
+  // Picks the first already-connected device from `adb devices`.
+  async autoConnectLocal() {
+    const list = execSync("adb devices", { encoding: "utf-8", timeout: 5000 });
+    for (const line of list.split("\n")) {
+      const parts = line.trim().split(/\s+/);
+      if (parts.length === 2 && parts[1] === "device") {
+        this.serial = parts[0];
+        this.deviceIp = this.serial;
+        console.log(`✅ Using local ADB device: ${this.serial}`);
+        return true;
+      }
+    }
+    return false;
   }
 
   disconnect() {

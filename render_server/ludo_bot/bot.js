@@ -13,7 +13,7 @@
 // Env vars:
 //  FIREBASE_DATABASE_URL   — required
 //  FIREBASE_SERVICE_JSON   — required (base64-encoded service account JSON)
-//  LUDO_BOT_DEVICE_IP      — required (e.g. 192.168.1.100:5555)
+//  LUDO_BOT_DEVICE_IP      — optional (e.g. 192.168.1.100:5555; omit for same-device/Termux mode)
 //  LUDO_BOT_PACKAGE_NAME   — optional (default com.ludo.king)
 //  LUDO_BOT_RECONNECT_SEC  — optional (default 30)
 
@@ -68,11 +68,25 @@ class LudoKingBot {
     this._initFirebase();
 
     const deviceIp = process.env.LUDO_BOT_DEVICE_IP;
-    if (!deviceIp) throw new Error("LUDO_BOT_DEVICE_IP is required (e.g. 192.168.1.100:5555)");
 
-    // Connect to device
-    console.log(`🔌 Connecting to ADB device: ${deviceIp}`);
-    await this.adb.connect(deviceIp);
+    if (deviceIp) {
+      // Remote ADB device
+      console.log(`🔌 Connecting to ADB device: ${deviceIp}`);
+      await this.adb.connect(deviceIp);
+    } else {
+      // Same-device mode (Termux) — auto-connect to local ADB
+      console.log("📱 No LUDO_BOT_DEVICE_IP set — trying same-device ADB...");
+      const ok = await this.adb.autoConnectLocal();
+      if (!ok) {
+        throw new Error(
+          "Could not find an ADB device. For same-device mode:\n" +
+          "  1. Enable Developer Options & Wireless Debugging\n" +
+          "  2. Run: adb connect 127.0.0.1:<port>\n" +
+          "  3. Or set LUDO_BOT_DEVICE_IP env var"
+        );
+      }
+    }
+
     this.resolution = await detectResolution(this.adb);
     console.log(`📱 Device: ${this.resolution.width}x${this.resolution.height} (preset: ${this.resolution.key})`);
 
@@ -267,11 +281,13 @@ class LudoKingBot {
         const online = await this.adb.isOnline();
         if (!online && this.running) {
           console.warn("⚠️  ADB device offline. Reconnecting...");
-          const ip = process.env.LUDO_BOT_DEVICE_IP;
+          const ip = process.env.LUDO_BOT_DEVICE_IP || this.adb.deviceIp;
           if (ip) {
             try { await this.adb.connect(ip); } catch (e) {
               console.error("❌ Reconnect failed:", e.message);
             }
+          } else {
+            console.warn("⚠️  No device IP configured, cannot reconnect");
           }
         }
       } catch (e) {

@@ -19,7 +19,7 @@ const { LudoKingBot } = require("./bot");
 
 // ── Validate env ──────────────────────────────────────────────────────────────
 
-const REQUIRED = ["FIREBASE_DATABASE_URL", "FIREBASE_SERVICE_JSON", "LUDO_BOT_DEVICE_IP"];
+const REQUIRED = ["FIREBASE_DATABASE_URL", "FIREBASE_SERVICE_JSON"];
 for (const key of REQUIRED) {
   if (!process.env[key]) {
     console.error(`❌ Missing required env var: ${key}`);
@@ -27,9 +27,9 @@ for (const key of REQUIRED) {
     console.error("   Required:");
     console.error("     FIREBASE_DATABASE_URL    — Firebase RTDB URL");
     console.error("     FIREBASE_SERVICE_JSON    — base64-encoded service account JSON");
-    console.error("     LUDO_BOT_DEVICE_IP       — ADB-over-WiFi IP:port of the phone");
     console.error("");
     console.error("   Optional:");
+    console.error("     LUDO_BOT_DEVICE_IP       — ADB-over-WiFi IP:port (omit for same-device/Termux)");
     console.error("     LUDO_BOT_PACKAGE_NAME    — Ludo King package (default: com.ludo.king)");
     console.error("     LUDO_BOT_RECONNECT_SEC   — ADB health-check interval (default: 30)");
     console.error("");
