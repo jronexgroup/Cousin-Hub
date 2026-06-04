@@ -137,9 +137,28 @@ class _UpdateDialogState extends State<_UpdateDialog> {
       onWillPop: () async => !widget.forceUpdate,
       child: Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        clipBehavior: Clip.none,
+        child: SizedBox(
+          width: double.infinity,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
+            // Close button for non-force updates
+            if (!widget.forceUpdate)
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8, right: 8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 32, height: 32,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF3B1F0A), shape: BoxShape.circle),
+                      child: const Icon(Icons.close, color: Colors.white, size: 18))))),
+
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
             // Icon
             Container(width: 72, height: 72,
               decoration: BoxDecoration(gradient: const LinearGradient(
@@ -230,10 +249,11 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                     child: const Text('Update Now ⬇️', style: TextStyle(color: Colors.white,
                       fontWeight: FontWeight.w700, fontSize: 14)))))),
             ]),
-          ]),
-        ),
-      ),
-    );
+          ]),       // ] inner Column children, ) inner Column
+        ),          // ) Padding
+        ]),         // ] outer Column children, ) outer Column
+      ),            // ) SizedBox
+    ));             // ) Dialog, ) WillPopScope
   }
 
   Widget _versionChip(String version, Color bg, Color text) =>

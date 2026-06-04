@@ -43,7 +43,7 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
       final data = Map<String, dynamic>.from(e.snapshot.value as Map);
       setState(() => _match = data);
 
-      if (data['matchStarted'] == true && !_hasAutoLaunched) {
+      if (data['matchStarted'] == true && data['deepLink'] != null && !_hasAutoLaunched) {
         _hasAutoLaunched = true;
         final link = data['deepLink'] as String? ?? '';
         if (link.isNotEmpty) {
@@ -124,13 +124,15 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
             gradient: const LinearGradient(colors: [Color(0xFF1A1A3E), Color(0xFF2D1B69)]),
             borderRadius: BorderRadius.circular(20)),
           child: Column(children: [
-            Text(matchStarted ? '🚀' : status == 'finished' ? '🏁' : hasRoom ? '👑' : '🤖',
+            Text(matchStarted && _hasAutoLaunched ? '🎮' : matchStarted ? '🚀' : status == 'finished' ? '🏁' : hasRoom ? '👑' : '🤖',
               style: const TextStyle(fontSize: 44)),
-            Text(matchStarted
-                ? 'Starting...'
-                : hasRoom
-                    ? '$joined/$total Joined'
-                    : 'Setting up...',
+            Text(matchStarted && _hasAutoLaunched
+                ? 'Match in progress'
+                : matchStarted
+                    ? 'Starting...'
+                    : hasRoom
+                        ? '$joined/$total Joined'
+                        : 'Setting up...',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
             const SizedBox(height: 8),
             if (hasRoom)
@@ -224,44 +226,43 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
                 style: TextStyle(color: Colors.white54, fontSize: 13), textAlign: TextAlign.center)),
 
           // Start Match button
-          SizedBox(
-            width: double.infinity,
-            child: AppTheme.gradientButton(
-              label: matchStarted
-                  ? '🚀 Match Starting...'
-                  : !hasRoom
-                      ? '⏳ Waiting for room code...'
-                      : joined < total
-                          ? '🚀 Start Match Anyway (${total - joined} waiting)'
-                          : '🚀 Start Match',
-              onTap: matchStarted || !hasRoom ? null : _startMatch,
-              height: 52),
-          ),
-
-          if (!matchStarted) ...[
-            const SizedBox(height: 8),
+          if (!matchStarted)
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton(
-                onPressed: _goDeclareResults,
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.green.shade400, width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                  padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: Text('🏁 Declare Results',
-                  style: TextStyle(color: Colors.green.shade400, fontWeight: FontWeight.w800))),
+              child: AppTheme.gradientButton(
+                label: !hasRoom
+                    ? '⏳ Waiting for room code...'
+                    : joined < total
+                        ? '🚀 Start Match Anyway (${total - joined} waiting)'
+                        : '🚀 Start Match',
+                onTap: hasRoom ? _startMatch : null,
+                height: 52),
             ),
-          ],
+
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: _goDeclareResults,
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Colors.green.shade400, width: 1.5),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+              child: Text('🏁 Declare Results',
+                style: TextStyle(color: Colors.green.shade400, fontWeight: FontWeight.w800))),
+          ),
         ],
 
         // ── Player section (non-host) ──
         if (!widget.isHost && status != 'finished') ...[
           const SizedBox(height: 16),
-          Text(matchStarted
-              ? '🚀 Auto-starting Ludo King...'
-              : hasRoom
-                  ? '⏳ Waiting for host to start the match...'
-                  : '⏳ Room is being set up...',
+          Text(matchStarted && _hasAutoLaunched
+              ? '🎮 Match in progress — playing in Ludo King'
+              : matchStarted
+                  ? '🚀 Auto-starting Ludo King...'
+                  : hasRoom
+                      ? '⏳ Waiting for host to start the match...'
+                      : '⏳ Room is being set up...',
             style: const TextStyle(color: Colors.white54, fontSize: 14, fontWeight: FontWeight.w600),
             textAlign: TextAlign.center),
         ],

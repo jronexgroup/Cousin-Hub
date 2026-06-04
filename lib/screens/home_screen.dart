@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../services/cache_service.dart';
+import '../services/update_service.dart';
 import '../app_theme.dart';
 import 'login_screen.dart';
 import 'chat_screen.dart';
@@ -52,6 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _boot();
     _watchInvites();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      UpdateService.checkForUpdate(context);
+    });
   }
 
   // ── Boot: cache first, then Firebase ──────────────────

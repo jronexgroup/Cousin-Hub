@@ -37,13 +37,7 @@ class CousinHubApp extends StatelessWidget {
         fontFamily: 'Roboto',
       ),
       home: CallListenerWrapper(
-        child: Builder(builder: (ctx) {
-          // Check update after first frame
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            UpdateService.checkForUpdate(ctx);
-          });
-          return const SplashScreen();
-        }),
+        child: const SplashScreen(),
       ),
     );
   }
