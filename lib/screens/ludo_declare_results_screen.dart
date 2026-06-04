@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../app_theme.dart';
+import 'ludo_result_screen.dart';
 
 class LudoDeclareResultsScreen extends StatefulWidget {
   final String matchId;
@@ -19,7 +20,6 @@ class _LudoDeclareResultsState extends State<LudoDeclareResultsScreen> {
   final _db = FirebaseDatabase.instance;
   List<_PlayerResult> _players = [];
   bool _saving = false;
-  bool _saved = false;
 
   @override
   void initState() {
@@ -94,14 +94,13 @@ class _LudoDeclareResultsState extends State<LudoDeclareResultsScreen> {
 
     await _db.ref('ludoKingMatches/${widget.matchId}').update({'status': 'finished'});
 
-    setState(() { _saving = false; _saved = true; });
+    if (!mounted) return;
+    Navigator.pushReplacement(context, MaterialPageRoute(
+      builder: (_) => LudoResultScreen(matchId: widget.matchId, uid: widget.hostUid)));
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_saved) {
-      return _resultView();
-    }
     return _editView();
   }
 
@@ -182,52 +181,6 @@ class _LudoDeclareResultsState extends State<LudoDeclareResultsScreen> {
             onTap: _players.any((p) => p.rank > 0) ? _save : null,
             height: 52),
           const SizedBox(height: 16),
-        ]),
-      ),
-    );
-  }
-
-  Widget _resultView() {
-    final medals = ['', '🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
-    final sorted = List<_PlayerResult>.from(_players)..sort((a, b) => a.rank.compareTo(b.rank));
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0A1A),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0A0A1A), elevation: 0,
-        title: const Text('🏆 Results Saved!', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white))),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Text('🎉', style: TextStyle(fontSize: 72)),
-          const SizedBox(height: 16),
-          const Text('Results Declared!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
-          const SizedBox(height: 8),
-          Text('Room: ${widget.roomCode}', style: const TextStyle(color: Colors.white54, fontSize: 14)),
-          const SizedBox(height: 24),
-          ...sorted.where((p) => p.rank > 0).map((p) {
-            final xp = p.rank < _xpForRank.length ? _xpForRank[p.rank] : 0;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: p.rank == 1 ? AppTheme.primary.withOpacity(0.15) : const Color(0xFF1A1A2E),
-                borderRadius: BorderRadius.circular(14),
-                border: p.rank == 1 ? Border.all(color: AppTheme.primary, width: 2) : null),
-              child: Row(children: [
-                Text(medals[p.rank.clamp(0, 5)], style: const TextStyle(fontSize: 32)),
-                const SizedBox(width: 12),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(p.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
-                  Text(rankLabel(p.rank), style: const TextStyle(color: Colors.white54, fontSize: 12)),
-                ])),
-                Text('+$xp XP', style: const TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.w900)),
-              ]));
-          }),
-          const SizedBox(height: 24),
-          AppTheme.gradientButton(
-            label: '🏠 Back to Ludo King',
-            onTap: () => Navigator.of(context).popUntil((r) => r.isFirst),
-            height: 52),
         ]),
       ),
     );

@@ -3,6 +3,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../app_theme.dart';
 import '../services/auth_service.dart';
+import 'home_screen.dart';
+import 'ludo_result_screen.dart';
 import 'ludo_declare_results_screen.dart';
 
 class LudoMatchLobbyScreen extends StatefulWidget {
@@ -17,6 +19,13 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
   final _db = FirebaseDatabase.instance;
   final _uid = AuthService().currentUid ?? '';
   Map<String, dynamic> _match = {};
+  bool _hasAutoLaunched = false;
+
+  void _goHome() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (route) => false);
+  }
 
   @override
   void initState() {
@@ -28,12 +37,21 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
     }
     _db.ref('ludoKingMatches/${widget.matchId}').onValue.listen((e) {
       if (!e.snapshot.exists || !mounted) {
-        if (!e.snapshot.exists && mounted) {
-          Navigator.of(context).popUntil((r) => r.isFirst);
-        }
+        if (!e.snapshot.exists && mounted) _goHome();
         return;
       }
-      setState(() => _match = Map<String, dynamic>.from(e.snapshot.value as Map));
+      final data = Map<String, dynamic>.from(e.snapshot.value as Map);
+      setState(() => _match = data);
+
+      if (data['matchStarted'] == true && data['deepLink'] != null && !_hasAutoLaunched) {
+        _hasAutoLaunched = true;
+        _openLudoKing();
+      }
+
+      if (data['status'] == 'finished' && mounted) {
+        Navigator.pushReplacement(context, MaterialPageRoute(
+          builder: (_) => LudoResultScreen(matchId: widget.matchId, uid: _uid)));
+      }
     });
   }
 
@@ -47,7 +65,14 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
     }
   }
 
-  void _goToResults() {
+  void _startMatch() {
+    _db.ref('ludoKingMatches/${widget.matchId}').update({
+      'matchStarted': true,
+      'startedAt': ServerValue.timestamp,
+    });
+  }
+
+  void _goDeclareResults() {
     if (!mounted) return;
     Navigator.push(context, MaterialPageRoute(
       builder: (_) => LudoDeclareResultsScreen(
@@ -67,19 +92,21 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
     final joined = players.values.where((p) => (Map.from(p as Map))['status'] == 'joined').length;
     final total = players.length;
     final roomCode = _match['roomCode'] as String? ?? '';
-    final botStatus = _match['botStatus'] as String? ?? '';
-    final creationMethod = _match['creationMethod'] as String? ?? 'bot';
     final hasRoom = roomCode.isNotEmpty;
-    final botLeft = botStatus == 'departed';
-    final isManual = creationMethod == 'manual';
+    final matchStarted = _match['matchStarted'] == true;
+    final status = _match['status'] as String? ?? 'waiting';
+    final pending = players.entries.where((e) => (Map.from(e.value as Map))['status'] != 'joined').toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A1A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0A0A1A), elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: _goHome),
         title: const Text('Match Lobby 🎮', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
         actions: [
-          if (widget.isHost)
+          if (widget.isHost && !matchStarted && status != 'finished')
             TextButton(
               onPressed: () {
                 _db.ref('ludoKingMatches/${widget.matchId}').update({'status': 'cancelled'});
@@ -87,12 +114,13 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
                 for (final uid in players.keys) {
                   _db.ref('ludoKingInvites/$uid/${widget.matchId}').remove();
                 }
-                Navigator.of(context).popUntil((r) => r.isFirst);
+                _goHome();
               },
               child: const Text('Cancel', style: TextStyle(color: Colors.red))),
         ],
       ),
       body: Padding(padding: const EdgeInsets.all(14), child: Column(children: [
+        // Status header
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -100,8 +128,13 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
             gradient: const LinearGradient(colors: [Color(0xFF1A1A3E), Color(0xFF2D1B69)]),
             borderRadius: BorderRadius.circular(20)),
           child: Column(children: [
-            Text(hasRoom ? '👑' : botLeft ? '🚪' : isManual ? '✍️' : '🤖', style: const TextStyle(fontSize: 44)),
-            Text(hasRoom ? '$joined/$total Joined' : botLeft ? 'Bot has left' : isManual ? 'Host will create room' : 'Waiting for bot...',
+            Text(matchStarted ? '🚀' : status == 'finished' ? '🏁' : hasRoom ? '👑' : '🤖',
+              style: const TextStyle(fontSize: 44)),
+            Text(matchStarted
+                ? 'Starting...'
+                : hasRoom
+                    ? '$joined/$total Joined'
+                    : 'Setting up...',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
             const SizedBox(height: 8),
             if (hasRoom)
@@ -111,38 +144,43 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
                   decoration: BoxDecoration(color: Colors.white.withOpacity(0.1), borderRadius: BorderRadius.circular(100)),
                   child: Text('Code: $roomCode', style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700))),
               ]),
-            if (!hasRoom && !botLeft)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: Colors.amber.withOpacity(0.2), borderRadius: BorderRadius.circular(100)),
-                child: Text(isManual
-                    ? '✍️ Host will create room and share code'
-                    : botStatus == 'creating_room'
-                        ? '🔨 Creating room...'
-                        : '🤖 Bot will create room shortly',
-                  style: const TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.w700))),
           ])),
-
         const SizedBox(height: 12),
 
-        // Bot status banner
-        if (botStatus == 'creating_room')
+        // Pending players warning (only before match starts)
+        if (!matchStarted && status != 'finished' && pending.isNotEmpty)
           Container(
+            width: double.infinity,
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.amber.withOpacity(0.08), borderRadius: BorderRadius.circular(10)),
-            child: Row(children: [
-              const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.amber)),
-              const SizedBox(width: 10),
-              const Expanded(child: Text('Bot is creating a room in Ludo King...', style: TextStyle(color: Colors.amber, fontSize: 12))),
+            decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                const Icon(Icons.access_time_rounded, color: Colors.orange, size: 16),
+                const SizedBox(width: 6),
+                Text('Waiting for ${pending.length} player${pending.length > 1 ? 's' : ''}',
+                  style: const TextStyle(color: Colors.orange, fontSize: 13, fontWeight: FontWeight.w700)),
+              ]),
+              const SizedBox(height: 6),
+              ...pending.map((e) {
+                final p = Map<String, dynamic>.from(e.value as Map);
+                return Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(children: [
+                    const Text('⏳ ', style: TextStyle(fontSize: 12)),
+                    Text(p['name']?.toString() ?? 'Cousin',
+                      style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                  ]));
+              }),
             ])),
 
+        // Player list
         Expanded(child: ListView(children: [
           ...players.entries.map((e) {
             final uid = e.key;
             final p = Map<String, dynamic>.from(e.value as Map);
             final isMe = uid == _uid;
-            final status = p['status'] ?? 'pending';
+            final s = p['status'] ?? 'pending';
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(14),
@@ -150,19 +188,19 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
                 color: const Color(0xFF1A1A2E),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: status == 'joined' ? Colors.green : Colors.grey.shade800,
-                  width: status == 'joined' ? 2 : 1)),
+                  color: s == 'joined' ? Colors.green : Colors.grey.shade800,
+                  width: s == 'joined' ? 2 : 1)),
               child: Row(children: [
                 Container(
                   width: 10, height: 10,
                   margin: const EdgeInsets.only(right: 10),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: status == 'joined' ? Colors.green : Colors.grey.shade700)),
+                    color: s == 'joined' ? Colors.green : Colors.grey.shade700)),
                 Container(
                   width: 38, height: 38,
                   decoration: BoxDecoration(
-                    color: status == 'joined' ? AppTheme.primary : Colors.grey.shade700,
+                    color: s == 'joined' ? AppTheme.primary : Colors.grey.shade700,
                     shape: BoxShape.circle),
                   child: Center(child: Text(
                     (p['name'] ?? '?').toString().substring(0, 1).toUpperCase(),
@@ -171,78 +209,56 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('${p['name'] ?? 'Cousin'}${isMe ? ' (You)' : ''}',
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
-                  Text(status == 'joined' ? '✅ Joined!' : status == 'pending' ? '⏳ Waiting...' : '❌ Cancelled',
-                    style: TextStyle(fontSize: 11, color: status == 'joined' ? Colors.green : Colors.grey.shade500)),
+                  Text(s == 'joined' ? '✅ Joined!' : '⏳ Waiting...',
+                    style: TextStyle(fontSize: 11, color: s == 'joined' ? Colors.green : Colors.grey.shade500)),
                 ])),
               ]));
           }),
         ])),
 
-        if (widget.isHost) ...[
-          if (joined >= 2 && hasRoom)
-            Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-              child: Text('$joined players joined! Go play in Ludo King!',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.green, fontSize: 13))),
-          if (hasRoom && joined >= 1) ...[
-            AppTheme.gradientButton(
-              label: '👑 Open Ludo King & Join Room',
-              onTap: _openLudoKing,
-              height: 50),
-            if (!isManual) ...[
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () {
-                    _db.ref('ludoKingMatches/${widget.matchId}').update({'botLeave': true});
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('🤖 Bot will leave the room'), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.orange.shade300, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                    padding: const EdgeInsets.symmetric(vertical: 12)),
-                  child: Text('🚪 Bot Leave Room (so bot can serve others)',
-                    style: TextStyle(color: Colors.orange.shade300, fontSize: 12, fontWeight: FontWeight.w800)))),
-            ],
-          ] else if (!hasRoom) ...[
-            const SizedBox(height: 10),
-            Text(isManual ? '✍️ Host will create room and share the code' : '⏳ Room code will appear here once the bot creates it',
-              textAlign: TextAlign.center, style: TextStyle(color: Colors.white38, fontSize: 12)),
-          ],
+        // ── Host section ──
+        if (widget.isHost && status != 'finished') ...[
           const SizedBox(height: 8),
+
+          // Start Match button
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton(
-              onPressed: hasRoom && joined >= 2 ? _goToResults : null,
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: hasRoom && joined >= 2 ? Colors.green : Colors.grey.shade700, width: 1.5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: Text(hasRoom && joined >= 2 ? '🏁 Declare Results (after match)' : isManual ? 'Wait for players...' : 'Wait for players & bot...',
-                  style: TextStyle(
-                    color: hasRoom && joined >= 2 ? Colors.green : Colors.grey.shade600,
-                    fontWeight: FontWeight.w800)))),
-        ] else ...[
-          if (!hasRoom) ...[
+            child: AppTheme.gradientButton(
+              label: matchStarted
+                  ? '🚀 Match Starting...'
+                  : joined < total
+                      ? '🚀 Start Match Anyway (${total - joined} waiting)'
+                      : '🚀 Start Match',
+              onTap: matchStarted ? null : _startMatch,
+              height: 52),
+          ),
+
+          if (!matchStarted) ...[
             const SizedBox(height: 8),
-            Text(isManual ? 'Host will create room and share the code' : 'Waiting for bot to create room...',
-              style: const TextStyle(color: Colors.white54, fontSize: 13)),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: _goDeclareResults,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.green.shade400, width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                  padding: const EdgeInsets.symmetric(vertical: 14)),
+                child: Text('🏁 Declare Results',
+                  style: TextStyle(color: Colors.green.shade400, fontWeight: FontWeight.w800))),
+            ),
           ],
-          if (hasRoom) ...[
-            const SizedBox(height: 8),
-            const Text('Waiting for host to start playing...',
-              style: TextStyle(color: Colors.white54, fontSize: 13)),
-            const SizedBox(height: 10),
-            AppTheme.gradientButton(
-              label: '👑 Open Ludo King & Join Room',
-              onTap: _openLudoKing,
-              height: 50),
-          ],
+        ],
+
+        // ── Player section (non-host) ──
+        if (!widget.isHost && status != 'finished') ...[
+          const SizedBox(height: 16),
+          Text(matchStarted
+              ? '🚀 Auto-starting Ludo King...'
+              : hasRoom
+                  ? '⏳ Waiting for host to start the match...'
+                  : '⏳ Room is being set up...',
+            style: const TextStyle(color: Colors.white54, fontSize: 14, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center),
         ],
 
         const SizedBox(height: 12),

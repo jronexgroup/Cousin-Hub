@@ -7,6 +7,7 @@ import '../app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/cache_service.dart';
 import '../services/notification_service.dart';
+import 'home_screen.dart';
 import 'ludo_match_lobby_screen.dart';
 
 class LudoKingInviteScreen extends StatefulWidget {
@@ -187,18 +188,6 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
       }
     }
 
-    await _db.ref('chats/main').push().set({
-      'text': '🎮 Ludo King Match Started!\n\nHost: $_myName\nPlayers: ${all.length}\n\n${method == 'manual' ? 'Host will share room code manually!' : 'Bot is creating the room — join the lobby!'}',
-      'type': 'ludo_king_invite',
-      'matchId': _matchId,
-      'senderUid': _myUid,
-      'senderName': _myName,
-      'senderPhoto': _myPhoto,
-      'timestamp': ServerValue.timestamp,
-      'seenBy': {},
-      'delivered': true,
-    });
-
     setState(() {
       _loading = false;
       _roomCreated = true;
@@ -344,7 +333,8 @@ class _LudoKingInviteState extends State<LudoKingInviteScreen> {
         backgroundColor: const Color(0xFF0A0A1A), elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst)),
+          onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false)),
         title: const Text('🎮 Match Created!', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white))),
       body: SafeArea(child: Padding(
         padding: const EdgeInsets.all(20),
