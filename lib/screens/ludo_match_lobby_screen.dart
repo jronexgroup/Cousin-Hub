@@ -35,7 +35,7 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
       _db.ref('ludoKingMatches/${widget.matchId}/players/$_uid/joinedAt').set(ServerValue.timestamp);
       _db.ref('ludoKingInvites/$_uid/${widget.matchId}').remove();
     }
-    _db.ref('ludoKingMatches/${widget.matchId}').onValue.listen((e) {
+    _db.ref('ludoKingMatches/${widget.matchId}').onValue.listen((e) async {
       if (!e.snapshot.exists || !mounted) {
         if (!e.snapshot.exists && mounted) _goHome();
         return;
@@ -43,9 +43,15 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
       final data = Map<String, dynamic>.from(e.snapshot.value as Map);
       setState(() => _match = data);
 
-      if (data['matchStarted'] == true && data['deepLink'] != null && !_hasAutoLaunched) {
+      if (data['matchStarted'] == true && !_hasAutoLaunched) {
         _hasAutoLaunched = true;
-        _openLudoKing();
+        final link = data['deepLink'] as String? ?? '';
+        if (link.isNotEmpty) {
+          final uri = Uri.parse(link);
+          try {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } catch (_) {}
+        }
       }
 
       if (data['status'] == 'finished' && mounted) {
@@ -53,16 +59,6 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
           builder: (_) => LudoResultScreen(matchId: widget.matchId, uid: _uid)));
       }
     });
-  }
-
-  Future<void> _openLudoKing() async {
-    final link = _match['deepLink'] as String? ?? '';
-    if (link.isNotEmpty) {
-      final uri = Uri.parse(link);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-    }
   }
 
   void _startMatch() {
@@ -220,16 +216,25 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
         if (widget.isHost && status != 'finished') ...[
           const SizedBox(height: 8),
 
+          // If no room code yet, show waiting message
+          if (!hasRoom && !matchStarted)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Text('⏳ Waiting for room code...',
+                style: TextStyle(color: Colors.white54, fontSize: 13), textAlign: TextAlign.center)),
+
           // Start Match button
           SizedBox(
             width: double.infinity,
             child: AppTheme.gradientButton(
               label: matchStarted
                   ? '🚀 Match Starting...'
-                  : joined < total
-                      ? '🚀 Start Match Anyway (${total - joined} waiting)'
-                      : '🚀 Start Match',
-              onTap: matchStarted ? null : _startMatch,
+                  : !hasRoom
+                      ? '⏳ Waiting for room code...'
+                      : joined < total
+                          ? '🚀 Start Match Anyway (${total - joined} waiting)'
+                          : '🚀 Start Match',
+              onTap: matchStarted || !hasRoom ? null : _startMatch,
               height: 52),
           ),
 
