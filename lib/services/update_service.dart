@@ -78,12 +78,23 @@ class UpdateService {
     BuildContext context, String url,
     ValueNotifier<double> progress) async {
     try {
-      // Request permission
-      final perm = await Permission.requestInstallPackages.request();
+      // Request install permission (Android)
+      var perm = await Permission.requestInstallPackages.request();
       if (!perm.isGranted) {
-        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please allow install from unknown sources')));
-        return;
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Allow install from unknown sources in settings'),
+            action: SnackBarAction(
+              label: 'Open Settings',
+              onPressed: () => openAppSettings(),
+            ),
+          ));
+        }
+        perm = await Permission.requestInstallPackages.request();
+        if (!perm.isGranted) {
+          if (context.mounted) openAppSettings();
+          return;
+        }
       }
 
       final dir = await getExternalStorageDirectory();

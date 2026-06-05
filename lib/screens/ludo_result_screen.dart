@@ -25,12 +25,21 @@ class _LudoResultScreenState extends State<LudoResultScreen> {
   }
 
   Future<void> _load() async {
-    final event = await _db.ref('ludoKingResults/${widget.matchId}').once();
-    if (!event.snapshot.exists || !mounted) return;
-    setState(() {
-      _results = Map<String, dynamic>.from(event.snapshot.value as Map);
-      _loading = false;
-    });
+    try {
+      final event = await _db.ref('ludoKingResults/${widget.matchId}').once();
+      if (!event.snapshot.exists || !mounted) return;
+      final val = event.snapshot.value;
+      if (val != null) {
+        setState(() {
+          _results = Map<String, dynamic>.from(val as Map);
+          _loading = false;
+        });
+      } else if (mounted) {
+        setState(() => _loading = false);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   void _goHome() {

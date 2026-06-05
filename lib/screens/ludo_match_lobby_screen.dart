@@ -54,7 +54,7 @@ class _LudoMatchLobbyState extends State<LudoMatchLobbyScreen> {
         }
       }
 
-      if (data['status'] == 'finished' && mounted) {
+      if (data['status'] == 'finished' && mounted && !widget.isHost) {
         Navigator.pushReplacement(context, MaterialPageRoute(
           builder: (_) => LudoResultScreen(matchId: widget.matchId, uid: _uid)));
       }
