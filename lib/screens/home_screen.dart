@@ -12,19 +12,15 @@ import 'memory_screen.dart';
 import 'profile_screen.dart';
 import 'voting_screen.dart';
 import 'eidi_screen.dart';
-import 'games_screen.dart';
 import 'members_screen.dart';
 import 'admin_screen.dart';
-import 'ludo_screen.dart';
 import 'ludo_king_invite_screen.dart';
 import 'ludo_match_lobby_screen.dart';
 import 'story_screen.dart';
-import 'racer_game.dart';
 import 'badges_screen.dart';
 import 'live_location_screen.dart';
 import 'family_storybook_screen.dart';
 import 'birthday_expense_screen.dart';
-import 'archery_game.dart';
 
 // ══════════════════════════════════════════════════════════
 //  HOME SCREEN — All features visible
@@ -114,26 +110,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _watchInvites() {
     final uid = AuthService().currentUid; if (uid == null) return;
 
-    // Ludo invites
-    FirebaseDatabase.instance.ref('ludoInvites/$uid').onChildAdded.listen((e) {
-      if (!e.snapshot.exists || !mounted) return;
-      final inv = Map<String, dynamic>.from(e.snapshot.value as Map);
-      final roomId = inv['roomId'] as String? ?? e.snapshot.key ?? '';
-      _showInviteDialog('🎲', inv['hostName'] ?? 'Cousin', 'Ludo Multiplayer 👑',
-        onAccept: () async {
-          final p = await AuthService().getProfile(uid);
-          await FirebaseDatabase.instance.ref('ludoRooms/$roomId/players/$uid').update({
-            'status': 'joined', 'name': p?['nickname']??p?['name']??'Cousin', 'photo': p?['photoUrl']??'',
-          });
-          await FirebaseDatabase.instance.ref('ludoInvites/$uid/$roomId').remove();
-          if (mounted) Navigator.push(context, MaterialPageRoute(builder: (_) => LudoFirebaseWaiting(roomId: roomId, isHost: false)));
-        },
-        onDecline: () async {
-          await FirebaseDatabase.instance.ref('ludoRooms/$roomId/players/$uid/status').set('declined');
-          await FirebaseDatabase.instance.ref('ludoInvites/$uid/$roomId').remove();
-        });
-    });
-
     // Ludo King Official invites
     FirebaseDatabase.instance.ref('ludoKingInvites/$uid').onChildAdded.listen((e) {
       if (!e.snapshot.exists || !mounted) return;
@@ -148,23 +124,6 @@ class _HomeScreenState extends State<HomeScreen> {
         onDecline: () async {
           await FirebaseDatabase.instance.ref('ludoKingInvites/$uid/$matchId').remove();
         });
-    });
-
-    // Race invites
-    FirebaseDatabase.instance.ref('raceInvites/$uid').onChildAdded.listen((e) {
-      if (!e.snapshot.exists || !mounted) return;
-      final inv = Map<String, dynamic>.from(e.snapshot.value as Map);
-      final roomId = inv['roomId'] as String? ?? e.snapshot.key ?? '';
-      _showInviteDialog('🏃', inv['hostName'] ?? 'Cousin', 'Cousin Racer 🏁',
-        onAccept: () async {
-          final p = await AuthService().getProfile(uid);
-          await FirebaseDatabase.instance.ref('raceRooms/$roomId/players/$uid').update({
-            'status': 'ready', 'name': p?['nickname']??p?['name']??'Cousin', 'photo': p?['photoUrl']??'',
-          });
-          await FirebaseDatabase.instance.ref('raceInvites/$uid/$roomId').remove();
-          if (mounted) Navigator.push(context, MaterialPageRoute(builder: (_) => RaceWaitingScreen(roomId: roomId, isHost: false)));
-        },
-        onDecline: () async => FirebaseDatabase.instance.ref('raceInvites/$uid/$roomId').remove());
     });
   }
 
@@ -340,14 +299,14 @@ class _HomeBody extends StatelessWidget {
         _sectionHeader('Games Zone 🎮'),
         const SizedBox(height: 10),
         _grid(context, [
-          _Card('🎲', 'Ludo',      const Color(0xFF1A0A2E), () => _go(context, const LudoKingInviteScreen()), light: false),
-          _Card('🏃', 'Racer',     const Color(0xFF0D1B0D), () => _go(context, const RacerLobbyScreen()), light: false),
-          _Card('🏹', 'Archery',   const Color(0xFF1A0808), () => _go(context, const ArcheryGameScreen()), light: false),
-          _Card('🧠', 'Quiz',      const Color(0xFFEDE9FE), () => _go(context, const GamesScreen())),
-          _Card('🎭', 'T/Dare',   const Color(0xFFE8F5E9), () => _go(context, const GamesScreen())),
-          _Card('🎡', 'Spin',      const Color(0xFFFFF0E8), () => _go(context, const GamesScreen())),
-          _Card('🤔', 'Who?',      const Color(0xFFFFF8E1), () => _go(context, const GamesScreen())),
-          _Card('🎲', 'Dare',      const Color(0xFFFFE8E8), () => _go(context, const GamesScreen())),
+          _Card('🎲', 'Ludo King', Colors.deepPurple, () => _go(context, const LudoKingInviteScreen()), light: false),
+          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
+          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
+          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
+          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
+          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
+          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
+          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
         ]),
 
         const SizedBox(height: 20),
@@ -426,7 +385,7 @@ class _HomeBody extends StatelessWidget {
 class _Card {
   final String icon, label;
   final Color bg;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool light;
   const _Card(this.icon, this.label, this.bg, this.onTap, {this.light = true});
 }
@@ -436,7 +395,8 @@ class _CardWidget extends StatelessWidget {
   const _CardWidget({super.key, required this.card});
   @override
   Widget build(BuildContext ctx) => GestureDetector(
-    onTap: card.onTap,
+    onTap: card.onTap ?? () => ScaffoldMessenger.of(ctx).showSnackBar(
+      const SnackBar(content: Text('Coming soon!'), duration: Duration(seconds: 1))),
     child: Container(
       decoration: BoxDecoration(color: card.bg, borderRadius: BorderRadius.circular(14),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0,2))]),

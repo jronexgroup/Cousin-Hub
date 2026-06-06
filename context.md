@@ -10,7 +10,7 @@
 - **Chat** — Group chat with 5 rooms: Main, Gaming, Travel, Study, Foodies. Supports text, images, videos, files, voice messages, emoji picker, seen/delivered status.
 - **Stories** — Post 24-hour photo/video/text stories (like Instagram).
 - **Memories / Photo Album** — Shared photo album where members can upload and view family photos.
-- **Voice & Video Calls** — Powered by **Agora RTC** SDK.
+- **Voice & Video Calls** — Placeholder screen; Agora removed. Will add WebRTC later.
 - **Live Location** — See where family members are on a map (using flutter_map + geolocator).
 - **Events** — Create and view family events.
 - **Eidi (Gift Tracker)** — Track who gave what during holidays.
@@ -18,10 +18,8 @@
 - **Members List** — See all family members, call them directly.
 
 ### Games Zone
-- **Ludo** — Multiplayer Ludo with Firebase real-time rooms + a WebView version (Ludo King).
-- **Racer** — Multiplayer racing game.
-- **Archery** — Archery game.
-- **Quiz / Truth or Dare / Spin the Wheel / Who Am I? / Dare** — Party games.
+- **Ludo King** — Single Ludo game via deep link (`url_launcher`). Creates match in Firebase, shares room code, launches Ludo King app on all devices. Host declares results after match, XP awarded, leaderboard + match history tracked.
+- **More games (4 main + 4 mini)** — Coming soon. Placeholder cards on home screen.
 
 ### Other Tools
 - **Family Storybook** — A collaborative story writing feature.
@@ -59,13 +57,13 @@ cousin_hub/                  # Flutter mobile app (Android/iOS/Web/Desktop)
 │   ├── firebase_options.dart # Firebase Android config
 │   ├── models/
 │   │   └── message_model.dart # Chat message data model
-│   ├── screens/             # 24 screen files (all features)
+│   ├── screens/             # 19 screen files (all features)
 │   │   ├── splash_screen.dart   # Animated splash → login or home
 │   │   ├── login_screen.dart    # Login + invite code entry
 │   │   ├── register_screen.dart # Register with invite code
 │   │   ├── home_screen.dart     # Main hub with 5 bottom tabs + feature grid
 │   │   ├── chat_screen.dart     # Full chat (text, media, voice, emoji)
-│   │   ├── call_screen.dart     # Agora voice/video call
+│   │   ├── call_screen.dart     # Call placeholder (WebRTC coming)
 │   │   ├── story_screen.dart    # Instagram-style stories
 │   │   ├── memory_screen.dart   # Photo album/memories
 │   │   ├── photo_album_screen.dart
@@ -74,16 +72,19 @@ cousin_hub/                  # Flutter mobile app (Android/iOS/Web/Desktop)
 │   │   ├── event_screen.dart
 │   │   ├── eidi_screen.dart
 │   │   ├── voting_screen.dart
-│   │   ├── games_screen.dart    # Quiz/TDare/Spin/Who/Dare
-│   │   ├── ludo_screen.dart     # Ludo game screens
-│   │   ├── ludo_webview_screen.dart
-│   │   ├── racer_game.dart      # Racing game
-│   │   ├── archery_game.dart
 │   │   ├── badges_screen.dart
 │   │   ├── live_location_screen.dart
 │   │   ├── family_storybook_screen.dart
 │   │   ├── birthday_expense_screen.dart
 │   │   └── admin_screen.dart    # Quick admin from mobile
+│   │   # ── Ludo King (deep link flow) ──
+│   │   # ludo_king_invite_screen.dart    — Create match, share code
+│   │   # ludo_match_lobby_screen.dart    — Start Match, auto-launch, Declare Results
+│   │   # ludo_declare_results_screen.dart — Host ranks players
+│   │   # ludo_result_screen.dart          — Post-match results with medals/XP
+│   │   # ludo_king_match_screen.dart      — Stats, recent matches, leaderboard
+│   │   # ludo_leaderboard_screen.dart     — XP leaderboard
+│   │   # ludo_match_history_screen.dart   — Past matches
 │   ├── services/
 │       ├── auth_service.dart       # Firebase auth + invite code + profile CRUD
 │       ├── call_service.dart       # Initiate/accept/reject/end calls via RTDB
@@ -115,9 +116,9 @@ cousin_hub/                  # Flutter mobile app (Android/iOS/Web/Desktop)
 | Mobile | Flutter 3.5+ (Dart) |
 | Backend | Firebase (Auth, RTDB, FCM, Hosting) |
 | Media | Cloudinary (image/video/file upload) |
-| Calls | Agora RTC Engine |
+| Calls | Placeholder (Agora removed, WebRTC planned) |
 | Maps | flutter_map + geolocator + latlong2 |
-| Games | Custom Firebase real-time multiplayer |
+| Ludo King | Deep link via url_launcher (launches official Ludo King app) |
 | Admin | React + Vite + Tailwind + Firebase Web SDK |
 | Server | Node.js + Express + Firebase Admin SDK |
 | Notifications | Firebase Cloud Messaging + flutter_local_notifications |
@@ -139,12 +140,15 @@ cousin_hub/                  # Flutter mobile app (Android/iOS/Web/Desktop)
 - `events/` — Family events
 - `notifications/` — Queued FCM pushes
 - `inviteCodes/{code}` — Valid invite codes
-- `ludoRooms/`, `raceRooms/`, `ludoInvites/`, `raceInvites/` — Game room state
+- `ludoKingMatches/{matchId}` — Ludo match state (players, deepLink, status)
+- `ludoKingResults/{matchId}` — Match results (ranks, XP earned)
+- `ludoKingInvites/{uid}/{matchId}` — Pending Ludo King invites
 - `appConfig/` — Update info (latestVersion, updateUrl, etc.)
 
 ## Important Notes
-- Agora App ID is hardcoded (`b686b1ec457344b29b45056e4b1fcec3`) in `call_screen.dart`
+- Agora removed (app was 254 MB); calls replaced with placeholder for future WebRTC.
 - Cloudinary keys are hardcoded in `cloudinary_service.dart`
 - Firebase Admin private key is embedded in `render_server/server.js` (security concern)
 - The app is **Android-only** currently (Firebase options only configured for Android)
+- Ludo King uses deep link `https://lk.gggred.com/?rmc=CODE&gt=0&po=0` to launch official app
 - Version: 1.0.0+1
