@@ -16,6 +16,11 @@ import 'members_screen.dart';
 import 'admin_screen.dart';
 import 'ludo_king_invite_screen.dart';
 import 'ludo_match_lobby_screen.dart';
+import 'tictactoe_invite_screen.dart';
+import 'tictactoe_game_screen.dart';
+import 'pass_the_bomb_lobby_screen.dart';
+import 'pass_the_card_lobby_screen.dart';
+import 'truth_or_dare_lobby_screen.dart';
 import 'story_screen.dart';
 import 'badges_screen.dart';
 import 'live_location_screen.dart';
@@ -123,6 +128,81 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         onDecline: () async {
           await FirebaseDatabase.instance.ref('ludoKingInvites/$uid/$matchId').remove();
+        });
+    });
+
+    // Tic Tac Toe invites
+    FirebaseDatabase.instance.ref('ticTacToeInvites/$uid').onChildAdded.listen((e) {
+      if (!e.snapshot.exists || !mounted) return;
+      final inv = Map<String, dynamic>.from(e.snapshot.value as Map);
+      final matchId = inv['matchId'] as String? ?? e.snapshot.key ?? '';
+      _showInviteDialog('❌', inv['hostName'] ?? 'Cousin', 'Tic Tac Toe 🎮',
+        onAccept: () async {
+          await FirebaseDatabase.instance.ref('ticTacToeInvites/$uid/$matchId').remove();
+          final snap = await FirebaseDatabase.instance.ref('ticTacToeMatches/$matchId').get();
+          if (!snap.exists || !mounted) return;
+          final data = Map<String, dynamic>.from(snap.value as Map);
+          await FirebaseDatabase.instance.ref('ticTacToeMatches/$matchId').update({
+            'status': 'playing',
+            'lastMoveAt': ServerValue.timestamp,
+          });
+          if (mounted) Navigator.push(context, MaterialPageRoute(
+            builder: (_) => TicTacToeGameScreen(
+              matchId: matchId, myUid: uid, player: 2,
+              opponentName: data['hostName'] as String? ?? 'Cousin',
+              opponentPhoto: data['hostPhoto'] as String? ?? '',
+              isHost: false)));
+        },
+        onDecline: () async {
+          await FirebaseDatabase.instance.ref('ticTacToeInvites/$uid/$matchId').remove();
+        });
+    });
+
+    // Pass The Bomb invites
+    FirebaseDatabase.instance.ref('passBombInvites/$uid').onChildAdded.listen((e) {
+      if (!e.snapshot.exists || !mounted) return;
+      final inv = Map<String, dynamic>.from(e.snapshot.value as Map);
+      final roomId = inv['roomId'] as String? ?? e.snapshot.key ?? '';
+      _showInviteDialog('💣', inv['hostName'] ?? 'Cousin', 'Pass The Bomb 🔥',
+        onAccept: () async {
+          await FirebaseDatabase.instance.ref('passBombInvites/$uid/$roomId').remove();
+          if (mounted) Navigator.push(context, MaterialPageRoute(
+            builder: (_) => PassTheBombLobbyScreen(roomId: roomId, isHost: false)));
+        },
+        onDecline: () async {
+          await FirebaseDatabase.instance.ref('passBombInvites/$uid/$roomId').remove();
+        });
+    });
+
+    // Truth or Dare invites
+    FirebaseDatabase.instance.ref('truthOrDareInvites/$uid').onChildAdded.listen((e) {
+      if (!e.snapshot.exists || !mounted) return;
+      final inv = Map<String, dynamic>.from(e.snapshot.value as Map);
+      final roomId = inv['roomId'] as String? ?? e.snapshot.key ?? '';
+      _showInviteDialog('🎭', inv['hostName'] ?? 'Cousin', 'Truth or Dare Live 🎲',
+        onAccept: () async {
+          await FirebaseDatabase.instance.ref('truthOrDareInvites/$uid/$roomId').remove();
+          if (mounted) Navigator.push(context, MaterialPageRoute(
+            builder: (_) => TruthOrDareLobbyScreen(roomId: roomId, isHost: false)));
+        },
+        onDecline: () async {
+          await FirebaseDatabase.instance.ref('truthOrDareInvites/$uid/$roomId').remove();
+        });
+    });
+
+    // Pass The Card invites
+    FirebaseDatabase.instance.ref('passTheCardInvites/$uid').onChildAdded.listen((e) {
+      if (!e.snapshot.exists || !mounted) return;
+      final inv = Map<String, dynamic>.from(e.snapshot.value as Map);
+      final roomId = inv['roomId'] as String? ?? e.snapshot.key ?? '';
+      _showInviteDialog('🃏', inv['hostName'] ?? 'Cousin', 'Pass The Card 🃏',
+        onAccept: () async {
+          await FirebaseDatabase.instance.ref('passTheCardInvites/$uid/$roomId').remove();
+          if (mounted) Navigator.push(context, MaterialPageRoute(
+            builder: (_) => PassTheCardLobbyScreen(roomId: roomId, isHost: false)));
+        },
+        onDecline: () async {
+          await FirebaseDatabase.instance.ref('passTheCardInvites/$uid/$roomId').remove();
         });
     });
   }
@@ -300,7 +380,10 @@ class _HomeBody extends StatelessWidget {
         const SizedBox(height: 10),
         _grid(context, [
           _Card('🎲', 'Ludo King', Colors.deepPurple, () => _go(context, const LudoKingInviteScreen()), light: false),
-          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
+          _Card('❌', 'Tic Tac Toe', const Color(0xFF1B3A2D), () => _go(context, const TicTacToeInviteScreen()), light: false),
+          _Card('💣', 'Pass The Bomb', const Color(0xFF4A0E4E), () => _go(context, const PassTheBombLobbyScreen()), light: false),
+          _Card('🎭', 'Truth or Dare', const Color(0xFF2D1B69), () => _go(context, const TruthOrDareLobbyScreen()), light: false),
+          _Card('🃏', 'Pass The Card', const Color(0xFF1B3A1B), () => _go(context, const PassTheCardLobbyScreen()), light: false),
           _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
           _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
           _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
@@ -392,7 +475,7 @@ class _Card {
 
 class _CardWidget extends StatelessWidget {
   final _Card card;
-  const _CardWidget({super.key, required this.card});
+  const _CardWidget({required this.card});
   @override
   Widget build(BuildContext ctx) => GestureDetector(
     onTap: card.onTap ?? () => ScaffoldMessenger.of(ctx).showSnackBar(

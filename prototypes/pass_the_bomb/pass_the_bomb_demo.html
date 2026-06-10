@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>💣 PASS THE BOMB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a28;
+            --accent-red: #ff2d2d;
+            --accent-orange: #ff6b2d;
+            --accent-yellow: #ffd700;
+            --accent-green: #00ff88;
+            --accent-blue: #2d8fff;
+            --accent-purple: #a855f7;
+            --text-primary: #ffffff;
+            --text-secondary: #8b8b9e;
+            --text-muted: #4a4a5e;
+            --border: #2a2a3e;
+            --glow-red: 0 0 20px rgba(255, 45, 45, 0.5), 0 0 60px rgba(255, 45, 45, 0.2);
+            --glow-green: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 60px rgba(0, 255, 136, 0.2);
+            --glow-yellow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        /* Particle Background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Screen System */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* === SCREEN 1: LOBBY === */
+        .lobby-title {
+            font-family: 'Black Ops One', cursive;
+            font-size: 2.8rem;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-orange), var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            filter: drop-shadow(0 0 20px rgba(255, 45, 45, 0.3));
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255, 45, 45, 0.3)); }
+            50% { transform: scale(1.02); filter: drop-shadow(0 0 30px rgba(255, 45, 45, 0.5)); }
+        }
+
+        .lobby-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .lobby-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .room-code-display {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px dashed var(--accent-blue);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .room-code-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .room-code {
+            font-family: 'Black Ops One', cursive;
+            font-size: 2rem;
+            color: var(--accent-blue);
+            letter-spacing: 8px;
+        }
+
+        .players-list {
+            margin-bottom: 20px;
+        }
+
+        .players-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .players-count {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .player-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: var(--bg-card-hover);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .player-row:hover {
+            border-color: var(--border);
+            transform: translateX(3px);
+        }
+
+        .player-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .player-status {
+            font-size: 0.7rem;
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .ready-badge {
+            background: var(--accent-green);
+            color: var(--bg-dark);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+            color: white;
+            box-shadow: var(--glow-red);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(255, 45, 45, 0.6), 0 0 80px rgba(255, 45, 45, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, var(--accent-green), #00cc6a);
+            color: var(--bg-dark);
+            box-shadow: var(--glow-green);
+        }
+
+        .btn-green:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* === SCREEN 2: COUNTDOWN === */
+        .countdown-screen {
+            background: var(--bg-dark);
+        }
+
+        .countdown-number {
+            font-family: 'Black Ops One', cursive;
+            font-size: 10rem;
+            color: var(--accent-red);
+            text-shadow: var(--glow-red);
+            animation: countdownPop 0.8s ease-out;
+        }
+
+        @keyframes countdownPop {
+            0% { transform: scale(3); opacity: 0; }
+            50% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .countdown-label {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            margin-top: -20px;
+        }
+
+        .go-text {
+            font-family: 'Black Ops One', cursive;
+            font-size: 8rem;
+            color: var(--accent-green);
+            text-shadow: var(--glow-green);
+            animation: goFlash 0.6s ease-out;
+        }
+
+        @keyframes goFlash {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* === SCREEN 3: GAMEPLAY === */
+        .gameplay-screen {
+            padding: 0;
+            justify-content: flex-start;
+        }
+
+        .game-header {
+            width: 100%;
+            padding: 15px 20px;
+            background: linear-gradient(180deg, rgba(10,10,15,0.95), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .round-info {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .alive-count {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .alive-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        .bomb-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 15;
+        }
+
+        .bomb-icon {
+            font-size: 5rem;
+            animation: bombFloat 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 45, 45, 0.6));
+        }
+
+        @keyframes bombFloat {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .bomb-holder-name {
+            font-family: 'Black Ops One', cursive;
+            font-size: 2rem;
+            color: var(--accent-red);
+            text-shadow: var(--glow-red);
+            margin-top: 10px;
+            animation: holderPulse 0.8s ease-in-out infinite;
+        }
+
+        @keyframes holderPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .bomb-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-top: 5px;
+        }
+
+        .players-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .player-node {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .player-node.eliminated {
+            opacity: 0.3;
+            filter: grayscale(100%);
+            pointer-events: none;
+        }
+
+        .player-node.has-bomb .node-avatar {
+            box-shadow: 0 0 0 3px var(--accent-red), 0 0 20px rgba(255, 45, 45, 0.5);
+            animation: bombHolderShake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes bombHolderShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
+        }
+
+        .node-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .node-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .player-node:hover .node-avatar {
+            transform: scale(1.15);
+            border-color: var(--accent-yellow);
+        }
+
+        .player-node:hover .node-avatar::after {
+            border-color: var(--accent-yellow);
+        }
+
+        .node-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            white-space: nowrap;
+        }
+
+        .node-status {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        .pass-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(0deg, rgba(10,10,15,0.98), rgba(10,10,15,0.8));
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .cooldown-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cooldown-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-yellow));
+            border-radius: 3px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .cooldown-text {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .pass-btn {
+            padding: 18px;
+            font-size: 1.1rem;
+        }
+
+        .pass-btn:disabled {
+            background: var(--bg-card-hover);
+            box-shadow: none;
+            color: var(--text-muted);
+        }
+
+        /* Bomb Trail Animation */
+        .bomb-trail {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            filter: blur(8px);
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 12;
+            animation: trailFade 0.6s ease-out forwards;
+        }
+
+        @keyframes trailFade {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* === SCREEN 4: EXPLOSION === */
+        .explosion-screen {
+            background: var(--bg-dark);
+            overflow: hidden;
+        }
+
+        .explosion-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,100,0,0.8) 0%, rgba(255,45,45,0.4) 40%, transparent 70%);
+            animation: flashExpand 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes flashExpand {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .screen-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-10px, -5px); }
+            20% { transform: translate(10px, 5px); }
+            30% { transform: translate(-8px, -3px); }
+            40% { transform: translate(8px, 3px); }
+            50% { transform: translate(-5px, -2px); }
+            60% { transform: translate(5px, 2px); }
+            70% { transform: translate(-3px, -1px); }
+            80% { transform: translate(3px, 1px); }
+            90% { transform: translate(-1px, 0); }
+        }
+
+        .boom-text {
+            font-family: 'Black Ops One', cursive;
+            font-size: 6rem;
+            color: var(--accent-red);
+            text-shadow: var(--glow-red);
+            animation: boomPop 0.6s ease-out;
+            z-index: 10;
+        }
+
+        @keyframes boomPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .eliminated-player {
+            margin-top: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .eliminated-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .eliminated-name {
+            font-family: 'Black Ops One', cursive;
+            font-size: 2.5rem;
+            color: var(--accent-red);
+            text-shadow: var(--glow-red);
+        }
+
+        .skull-icon {
+            font-size: 4rem;
+            margin-top: 15px;
+            animation: skullBounce 1s ease-in-out infinite;
+        }
+
+        @keyframes skullBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* === SCREEN 5: RESULTS === */
+        .results-screen {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #0f0f1a 100%);
+        }
+
+        .results-title {
+            font-family: 'Black Ops One', cursive;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--accent-yellow), var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .podium {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            height: 200px;
+        }
+
+        .podium-place {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.4s ease;
+        }
+
+        .podium-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .podium-avatar.first {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-yellow), #ffaa00);
+            box-shadow: var(--glow-yellow);
+            font-size: 1.8rem;
+        }
+
+        .podium-avatar.second {
+            background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.4);
+        }
+
+        .podium-avatar.third {
+            background: linear-gradient(135deg, #cd7f32, #b87333);
+            box-shadow: 0 0 20px rgba(205, 127, 50, 0.4);
+        }
+
+        .podium-rank {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .podium-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+
+        .podium-points {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .podium-bar {
+            width: 80px;
+            border-radius: 8px 8px 0 0;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Black Ops One', cursive;
+            font-size: 1.2rem;
+            color: var(--bg-dark);
+        }
+
+        .podium-bar.first {
+            height: 100px;
+            background: linear-gradient(180deg, var(--accent-yellow), #ffaa00);
+        }
+
+        .podium-bar.second {
+            height: 70px;
+            background: linear-gradient(180deg, #c0c0c0, #a0a0a0);
+        }
+
+        .podium-bar.third {
+            height: 50px;
+            background: linear-gradient(180deg, #cd7f32, #b87333);
+        }
+
+        .elimination-list {
+            width: 100%;
+            max-width: 380px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .elimination-list-title {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .elimination-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .elimination-row:last-child {
+            border-bottom: none;
+        }
+
+        .elim-rank {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            width: 30px;
+            text-align: center;
+        }
+
+        .elim-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-card-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .elim-name {
+            flex: 1;
+            font-size: 0.85rem;
+        }
+
+        .elim-points {
+            font-size: 0.8rem;
+            color: var(--accent-yellow);
+            font-weight: 600;
+        }
+
+        .badges-section {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .badge {
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: badgePop 0.4s ease-out;
+        }
+
+        @keyframes badgePop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            animation: toastSlide 0.3s ease-out, toastFade 0.3s ease-in 2.5s forwards;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+
+        @keyframes toastSlide {
+            0% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes toastFade {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Spectator Mode Overlay */
+        .spectator-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            z-index: 50;
+            animation: bannerSlide 0.4s ease-out;
+        }
+
+        @keyframes bannerSlide {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .lobby-title { font-size: 2rem; }
+            .countdown-number { font-size: 7rem; }
+            .go-text { font-size: 5rem; }
+            .boom-text { font-size: 4rem; }
+            .bomb-holder-name { font-size: 1.5rem; }
+            .podium { gap: 10px; }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            pointer-events: none;
+            z-index: 50;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Scanline effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.03) 2px,
+                rgba(0,0,0,0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="scanlines"></div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- SCREEN 1: LOBBY -->
+    <div class="screen active" id="screen-lobby">
+        <div class="lobby-title">💣 PASS THE BOMB</div>
+        <div class="lobby-subtitle">Multiplayer Party Survival</div>
+
+        <div class="lobby-card">
+            <div class="room-code-display">
+                <div class="room-code-label">Room Code</div>
+                <div class="room-code" id="roomCode">BOMB-42</div>
+            </div>
+
+            <div class="players-list">
+                <div class="players-header">
+                    <span style="font-weight:700; font-size:0.9rem;">Players</span>
+                    <span class="players-count" id="playerCount">5/15</span>
+                </div>
+                <div id="lobbyPlayers">
+                    <div class="player-row">
+                        <div class="player-avatar" style="background:linear-gradient(135deg,#ff2d2d,#ff6b2d)">S</div>
+                        <div class="player-info">
+                            <div class="player-name">Sami (You)</div>
+                            <div class="player-status"><span class="status-dot"></span> Online</div>
+                        </div>
+                        <span class="ready-badge">Ready</span>
+                    </div>
+                    <div class="player-row">
+                        <div class="player-avatar" style="background:linear-gradient(135deg,#2d8fff,#a855f7)">H</div>
+                        <div class="player-info">
+                            <div class="player-name">Hasib</div>
+                            <div class="player-status"><span class="status-dot"></span> Online</div>
+                        </div>
+                        <span class="ready-badge">Ready</span>
+                    </div>
+                    <div class="player-row">
+                        <div class="player-avatar" style="background:linear-gradient(135deg,#00ff88,#00cc6a)">A</div>
+                        <div class="player-info">
+                            <div class="player-name">Arif</div>
+                            <div class="player-status"><span class="status-dot"></span> Online</div>
+                        </div>
+                        <span class="ready-badge">Ready</span>
+                    </div>
+                    <div class="player-row">
+                        <div class="player-avatar" style="background:linear-gradient(135deg,#ffd700,#ff6b2d)">R</div>
+                        <div class="player-info">
+                            <div class="player-name">Rakib</div>
+                            <div class="player-status"><span class="status-dot"></span> Online</div>
+                        </div>
+                        <span class="ready-badge">Ready</span>
+                    </div>
+                    <div class="player-row">
+                        <div class="player-avatar" style="background:linear-gradient(135deg,#a855f7,#ff2d2d)">R</div>
+                        <div class="player-info">
+                            <div class="player-name">Rifat</div>
+                            <div class="player-status"><span class="status-dot"></span> Online</div>
+                        </div>
+                        <span class="ready-badge">Ready</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="startMatchBtn" onclick="startMatch()">🚀 START MATCH</button>
+            <button class="btn btn-secondary" onclick="copyRoomCode()">📋 Copy Room Code</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: COUNTDOWN -->
+    <div class="screen countdown-screen" id="screen-countdown">
+        <div class="countdown-number" id="countdownNum">3</div>
+        <div class="countdown-label" id="countdownLabel">Get Ready</div>
+    </div>
+
+    <!-- SCREEN 3: GAMEPLAY -->
+    <div class="screen gameplay-screen" id="screen-gameplay">
+        <div class="game-header">
+            <div class="round-info">Round <span id="roundNum">1</span></div>
+            <div class="alive-count">
+                <span class="alive-dot"></span>
+                <span id="aliveCount">5 Alive</span>
+            </div>
+        </div>
+
+        <div class="players-grid" id="playersGrid"></div>
+
+        <div class="bomb-display" id="bombDisplay">
+            <div class="bomb-icon">💣</div>
+            <div class="bomb-holder-name" id="bombHolderName">SAMI</div>
+            <div class="bomb-label">HAS THE BOMB</div>
+        </div>
+
+        <div class="pass-panel" id="passPanel">
+            <div class="cooldown-bar">
+                <div class="cooldown-fill" id="cooldownFill" style="width:100%"></div>
+            </div>
+            <div class="cooldown-text" id="cooldownText">PASS READY</div>
+            <button class="btn btn-primary pass-btn" id="passBtn" onclick="passBomb()">🔥 PASS BOMB</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: EXPLOSION -->
+    <div class="screen explosion-screen" id="screen-explosion">
+        <div class="explosion-flash" id="explosionFlash"></div>
+        <div class="boom-text">💥 BOOM</div>
+        <div class="eliminated-player">
+            <div class="eliminated-label">Eliminated</div>
+            <div class="eliminated-name" id="eliminatedName">ARIF</div>
+            <div class="skull-icon">💀</div>
+        </div>
+    </div>
+
+    <!-- SCREEN 5: RESULTS -->
+    <div class="screen results-screen" id="screen-results">
+        <div class="results-title">🏆 MATCH RESULTS</div>
+
+        <div class="podium">
+            <div class="podium-place">
+                <div class="podium-avatar second">H</div>
+                <div class="podium-rank">🥈</div>
+                <div class="podium-name">Hasib</div>
+                <div class="podium-points">+60 pts</div>
+                <div class="podium-bar second">2</div>
+            </div>
+            <div class="podium-place">
+                <div class="podium-avatar first">S</div>
+                <div class="podium-rank">🥇</div>
+                <div class="podium-name">Sami</div>
+                <div class="podium-points">+100 pts</div>
+                <div class="podium-bar first">1</div>
+            </div>
+            <div class="podium-place">
+                <div class="podium-avatar third">A</div>
+                <div class="podium-rank">🥉</div>
+                <div class="podium-name">Arif</div>
+                <div class="podium-points">+30 pts</div>
+                <div class="podium-bar third">3</div>
+            </div>
+        </div>
+
+        <div class="elimination-list">
+            <div class="elimination-list-title">Elimination Order</div>
+            <div id="eliminationList">
+                <div class="elimination-row">
+                    <span class="elim-rank">4th</span>
+                    <div class="elim-avatar" style="background:linear-gradient(135deg,#ffd700,#ff6b2d)">R</div>
+                    <span class="elim-name">Rakib</span>
+                    <span class="elim-points">+10 pts</span>
+                </div>
+                <div class="elimination-row">
+                    <span class="elim-rank">5th</span>
+                    <div class="elim-avatar" style="background:linear-gradient(135deg,#a855f7,#ff2d2d)">R</div>
+                    <span class="elim-name">Rifat</span>
+                    <span class="elim-points">+10 pts</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="badges-section" id="badgesSection">
+            <div class="badge">💣 Bomb Master</div>
+            <div class="badge">🔥 Survivor</div>
+            <div class="badge">👑 Champion</div>
+        </div>
+
+        <div style="margin-top:25px; width:100%; max-width:380px;">
+            <button class="btn btn-primary" onclick="playAgain()">🔄 PLAY AGAIN</button>
+            <button class="btn btn-secondary" onclick="backToLobby()">🏠 LOBBY</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== GAME STATE =====
+        const players = [
+            { id: 1, name: 'Sami', initial: 'S', color: 'linear-gradient(135deg,#ff2d2d,#ff6b2d)', alive: true, isYou: true },
+            { id: 2, name: 'Hasib', initial: 'H', color: 'linear-gradient(135deg,#2d8fff,#a855f7)', alive: true, isYou: false },
+            { id: 3, name: 'Arif', initial: 'A', color: 'linear-gradient(135deg,#00ff88,#00cc6a)', alive: true, isYou: false },
+            { id: 4, name: 'Rakib', initial: 'R', color: 'linear-gradient(135deg,#ffd700,#ff6b2d)', alive: true, isYou: false },
+            { id: 5, name: 'Rifat', initial: 'R', color: 'linear-gradient(135deg,#a855f7,#ff2d2d)', alive: true, isYou: false }
+        ];
+
+        let currentBombHolder = 0; // index in players array
+        let round = 1;
+        let cooldownActive = false;
+        let cooldownTime = 0;
+        let cooldownMax = 0;
+        let eliminationOrder = [];
+        let isSpectator = false;
+        let gameActive = false;
+        let bombTimer = null;
+        let explosionTime = 0;
+        let passInProgress = false;
+
+        // ===== PARTICLES =====
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 8 + 's';
+                p.style.animationDuration = (5 + Math.random() * 5) + 's';
+                const colors = ['#ff2d2d', '#ff6b2d', '#ffd700', '#a855f7'];
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                container.appendChild(p);
+            }
+        }
+        createParticles();
+
+        // ===== SCREEN MANAGEMENT =====
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ===== LOBBY =====
+        function copyRoomCode() {
+            const code = document.getElementById('roomCode').textContent;
+            navigator.clipboard?.writeText(code);
+            showToast('📋 Room code copied!');
+        }
+
+        function startMatch() {
+            showScreen('screen-countdown');
+            let count = 3;
+            const numEl = document.getElementById('countdownNum');
+            const labelEl = document.getElementById('countdownLabel');
+
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    numEl.textContent = count;
+                    numEl.style.animation = 'none';
+                    numEl.offsetHeight; // trigger reflow
+                    numEl.style.animation = 'countdownPop 0.8s ease-out';
+                } else {
+                    clearInterval(interval);
+                    numEl.textContent = '';
+                    labelEl.textContent = '';
+                    const goEl = document.createElement('div');
+                    goEl.className = 'go-text';
+                    goEl.textContent = 'GO!';
+                    numEl.parentNode.insertBefore(goEl, labelEl);
+                    setTimeout(() => {
+                        goEl.remove();
+                        initGameplay();
+                    }, 1200);
+                }
+            }, 1000);
+        }
+
+        // ===== GAMEPLAY =====
+        function initGameplay() {
+            showScreen('screen-gameplay');
+            gameActive = true;
+            round = 1;
+            eliminationOrder = [];
+            isSpectator = false;
+
+            // Reset all players
+            players.forEach(p => { p.alive = true; });
+            currentBombHolder = Math.floor(Math.random() * players.length);
+
+            updateGameUI();
+            positionPlayers();
+            startRound();
+        }
+
+        function positionPlayers() {
+            const grid = document.getElementById('playersGrid');
+            grid.innerHTML = '';
+
+            const alive = players.filter(p => p.alive);
+            const count = alive.length;
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const radius = Math.min(window.innerWidth, window.innerHeight) * 0.32;
+
+            alive.forEach((player, i) => {
+                const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+                const x = centerX + Math.cos(angle) * radius - 28;
+                const y = centerY + Math.sin(angle) * radius - 40;
+
+                const node = document.createElement('div');
+                node.className = 'player-node' + (i === currentBombHolder ? ' has-bomb' : '');
+                node.id = 'player-node-' + player.id;
+                node.style.left = x + 'px';
+                node.style.top = y + 'px';
+                node.innerHTML = `
+                    <div class="node-avatar" style="background:${player.color}">${player.initial}</div>
+                    <div class="node-name">${player.name}</div>
+                    <div class="node-status">${i === currentBombHolder ? '💣 HOLDING' : 'Alive'}</div>
+                `;
+                node.onclick = () => selectPassTarget(player.id);
+                grid.appendChild(node);
+            });
+        }
+
+        function updateGameUI() {
+            const alive = players.filter(p => p.alive);
+            document.getElementById('roundNum').textContent = round;
+            document.getElementById('aliveCount').textContent = alive.length + ' Alive';
+
+            const holder = players[currentBombHolder];
+            document.getElementById('bombHolderName').textContent = holder.name.toUpperCase();
+
+            // Update pass panel based on whether you have bomb
+            const passPanel = document.getElementById('passPanel');
+            if (isSpectator) {
+                passPanel.innerHTML = '<div style="text-align:center;padding:15px;color:var(--text-secondary);font-size:0.85rem;">👁️ Spectator Mode</div>';
+            } else if (holder.isYou) {
+                passPanel.style.display = 'flex';
+            } else {
+                passPanel.style.display = 'flex';
+                document.getElementById('passBtn').disabled = true;
+                document.getElementById('passBtn').textContent = '⏳ WAITING...';
+            }
+        }
+
+        function startRound() {
+            const alive = players.filter(p => p.alive);
+            // Dynamic scaling from PDD
+            let minTime, maxTime;
+            if (alive.length >= 12) { minTime = 20; maxTime = 60; }
+            else if (alive.length >= 8) { minTime = 15; maxTime = 45; }
+            else if (alive.length >= 5) { minTime = 10; maxTime = 30; }
+            else if (alive.length >= 3) { minTime = 8; maxTime = 20; }
+            else { minTime = 8; maxTime = 15; }
+
+            explosionTime = minTime + Math.random() * (maxTime - minTime);
+
+            // Start hidden timer
+            let elapsed = 0;
+            bombTimer = setInterval(() => {
+                elapsed += 0.1;
+                if (elapsed >= explosionTime) {
+                    clearInterval(bombTimer);
+                    triggerExplosion();
+                }
+            }, 100);
+
+            // Set initial cooldown for bomb holder
+            if (players[currentBombHolder].isYou && !isSpectator) {
+                startCooldown();
+            }
+        }
+
+        function startCooldown() {
+            cooldownMax = 1 + Math.floor(Math.random() * 5); // 1-6 seconds
+            cooldownTime = cooldownMax;
+            cooldownActive = true;
+
+            const passBtn = document.getElementById('passBtn');
+            const fill = document.getElementById('cooldownFill');
+            const text = document.getElementById('cooldownText');
+
+            passBtn.disabled = true;
+            passBtn.textContent = '⏳ COOLDOWN...';
+
+            const interval = setInterval(() => {
+                cooldownTime -= 0.05;
+                const pct = (cooldownTime / cooldownMax) * 100;
+                fill.style.width = pct + '%';
+                text.textContent = `COOLDOWN: ${cooldownTime.toFixed(1)}s`;
+
+                if (cooldownTime <= 0) {
+                    clearInterval(interval);
+                    cooldownActive = false;
+                    fill.style.width = '100%';
+                    fill.style.background = 'linear-gradient(90deg, var(--accent-green), var(--accent-yellow))';
+                    text.textContent = 'PASS READY!';
+                    passBtn.disabled = false;
+                    passBtn.textContent = '🔥 PASS BOMB';
+                }
+            }, 50);
+        }
+
+        let selectedTarget = null;
+
+        function selectPassTarget(playerId) {
+            if (!gameActive || isSpectator) return;
+            if (!players[currentBombHolder].isYou) return;
+            if (cooldownActive) {
+                showToast('⏳ Cooldown active!');
+                return;
+            }
+
+            const target = players.find(p => p.id === playerId);
+            if (!target || !target.alive || target.id === players[currentBombHolder].id) return;
+
+            selectedTarget = playerId;
+
+            // Visual feedback
+            document.querySelectorAll('.player-node').forEach(n => n.style.opacity = '0.5');
+            document.getElementById('player-node-' + playerId).style.opacity = '1';
+            document.getElementById('player-node-' + playerId).style.transform = 'scale(1.2)';
+
+            showToast(`🎯 Selected: ${target.name}`);
+        }
+
+        function passBomb() {
+            if (!gameActive || isSpectator) return;
+            if (!players[currentBombHolder].isYou) return;
+            if (cooldownActive) return;
+            if (!selectedTarget) {
+                showToast('👆 Tap a player to select target!');
+                return;
+            }
+
+            const targetIdx = players.findIndex(p => p.id === selectedTarget);
+            if (targetIdx === -1 || !players[targetIdx].alive) return;
+
+            passInProgress = true;
+
+            // Animate bomb pass
+            animateBombPass(currentBombHolder, targetIdx, () => {
+                currentBombHolder = targetIdx;
+                selectedTarget = null;
+                passInProgress = false;
+
+                // Reset visuals
+                document.querySelectorAll('.player-node').forEach(n => {
+                    n.style.opacity = '';
+                    n.style.transform = '';
+                });
+
+                positionPlayers();
+                updateGameUI();
+
+                // New cooldown for receiver
+                if (players[currentBombHolder].isYou) {
+                    startCooldown();
+                }
+
+                showToast(`💣 ${players[currentBombHolder].name} received the bomb!`);
+            });
+        }
+
+        function animateBombPass(fromIdx, toIdx, callback) {
+            const fromNode = document.getElementById('player-node-' + players[fromIdx].id);
+            const toNode = document.getElementById('player-node-' + players[toIdx].id);
+
+            if (!fromNode || !toNode) { callback(); return; }
+
+            const fromRect = fromNode.getBoundingClientRect();
+            const toRect = toNode.getBoundingClientRect();
+
+            // Create trail particles
+            const steps = 10;
+            for (let i = 0; i <= steps; i++) {
+                setTimeout(() => {
+                    const t = i / steps;
+                    const x = fromRect.left + (toRect.left - fromRect.left) * t + 18;
+                    const y = fromRect.top + (toRect.top - fromRect.top) * t + 18;
+
+                    const trail = document.createElement('div');
+                    trail.className = 'bomb-trail';
+                    trail.style.left = x + 'px';
+                    trail.style.top = y + 'px';
+                    document.body.appendChild(trail);
+                    setTimeout(() => trail.remove(), 600);
+                }, i * 40);
+            }
+
+            setTimeout(callback, steps * 40 + 200);
+        }
+
+        function triggerExplosion() {
+            gameActive = false;
+            const holder = players[currentBombHolder];
+            holder.alive = false;
+            eliminationOrder.push(holder);
+
+            document.getElementById('eliminatedName').textContent = holder.name.toUpperCase();
+            showScreen('screen-explosion');
+
+            // Screen shake
+            document.body.classList.add('screen-shake');
+            setTimeout(() => document.body.classList.remove('screen-shake'), 500);
+
+            // Vibration
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+
+            setTimeout(() => {
+                const alive = players.filter(p => p.alive);
+                if (alive.length <= 1) {
+                    // Game over
+                    eliminationOrder.push(alive[0]);
+                    showResults();
+                } else {
+                    round++;
+                    // Pick new random holder from alive
+                    currentBombHolder = players.findIndex(p => p.id === alive[Math.floor(Math.random() * alive.length)].id);
+                    showScreen('screen-gameplay');
+                    gameActive = true;
+                    updateGameUI();
+                    positionPlayers();
+                    startRound();
+                }
+            }, 2500);
+        }
+
+        // ===== RESULTS =====
+        function showResults() {
+            showScreen('screen-results');
+
+            // Confetti
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const conf = document.createElement('div');
+                    conf.className = 'confetti';
+                    conf.style.left = Math.random() * 100 + '%';
+                    conf.style.background = ['#ff2d2d', '#ffd700', '#00ff88', '#2d8fff', '#a855f7'][Math.floor(Math.random() * 5)];
+                    conf.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(conf);
+                    setTimeout(() => conf.remove(), 3500);
+                }, i * 30);
+            }
+        }
+
+        function playAgain() {
+            showScreen('screen-lobby');
+        }
+
+        function backToLobby() {
+            showScreen('screen-lobby');
+        }
+
+        // ===== DEMO MODE: Auto-pass for AI =====
+        setInterval(() => {
+            if (!gameActive || isSpectator) return;
+            if (players[currentBombHolder].isYou) return; // Don't auto-pass for user
+            if (passInProgress) return;
+            if (Math.random() > 0.3) return; // Only 30% chance per tick
+
+            const alive = players.filter(p => p.alive && p.id !== players[currentBombHolder].id);
+            if (alive.length === 0) return;
+
+            const target = alive[Math.floor(Math.random() * alive.length)];
+            const targetIdx = players.findIndex(p => p.id === target.id);
+
+            passInProgress = true;
+            animateBombPass(currentBombHolder, targetIdx, () => {
+                currentBombHolder = targetIdx;
+                passInProgress = false;
+                positionPlayers();
+                updateGameUI();
+
+                if (players[currentBombHolder].isYou) {
+                    startCooldown();
+                    showToast('💣 You received the bomb! Pass it quick!');
+                }
+            });
+        }, 2000);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (gameActive) positionPlayers();
+        });
+    </script>
+</body>
+</html>

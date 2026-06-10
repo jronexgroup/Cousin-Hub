@@ -162,5 +162,552 @@ db.ref('chats/main').orderByChild('timestamp').limitToLast(1).on('child_added', 
   await sendToAll(`💬 ${msg.senderName}`, msg.text.substring(0, 60), msg.senderUid);
 });
 
+// ── Pass The Bomb Game Engine ──────────────────────────────────
+
+const bombTimers = {};
+
+// Recover active games on server restart
+async function recoverBombTimers() {
+  const snap = await db.ref('passBombRooms').once('value');
+  if (!snap.exists()) return;
+  snap.forEach(child => {
+    const room = child.val();
+    const roomId = child.key;
+    if (room.status === 'playing') {
+      if (room.explosionAt && room.explosionAt > Date.now()) {
+        const remaining = room.explosionAt - Date.now();
+        bombTimers[roomId] = setTimeout(() => explode(roomId), Math.max(remaining, 1000));
+        console.log(`🔁 Recovered bomb for ${roomId} (${Math.round(remaining/1000)}s)`);
+      } else {
+        console.log(`⚡ Missed timer — exploding ${roomId} immediately`);
+        explode(roomId);
+      }
+    } else if (room.status === 'countdown') {
+      setTimeout(() => startRound(roomId), 3000);
+    }
+  });
+}
+
+// Add createdAt on room creation
+db.ref('passBombRooms').on('child_added', async (snap) => {
+  const room = snap.val();
+  if (!room || room.createdAt) return;
+  await snap.ref.child('createdAt').set(Date.now());
+});
+
+// Listen for countdown → start round after 3s
+db.ref('passBombRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'countdown') return;
+  setTimeout(() => startRound(roomId), 3000);
+});
+
+// Listen for bomb holder changes → set cooldown
+db.ref('passBombRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'playing' || !room.currentBombHolder) return;
+  const prev = snap.previous.val();
+  if (prev && prev.currentBombHolder === room.currentBombHolder) return;
+
+  const cooldown = Math.floor(Math.random() * 5000) + 1000;
+  await db.ref(`passBombRooms/${roomId}/cooldownUntil`).set(Date.now() + cooldown);
+  console.log(`⏳ ${Math.round(cooldown/1000)}s cooldown for ${room.currentBombHolder} in ${roomId}`);
+});
+
+async function startRound(roomId) {
+  const snap = await db.ref(`passBombRooms/${roomId}`).once('value');
+  const room = snap.val();
+  if (!room || room.status !== 'countdown') return;
+
+  const players = room.players || {};
+  const aliveUids = Object.keys(players).filter(uid => players[uid]?.alive !== false);
+  if (aliveUids.length <= 1) return endGame(roomId, aliveUids[0] || null);
+
+  const holder = aliveUids[Math.floor(Math.random() * aliveUids.length)];
+  const delay = explodeDelay(aliveUids.length);
+  const round = (room.round || 0) + 1;
+
+  await db.ref(`passBombRooms/${roomId}`).update({
+    currentBombHolder: holder,
+    status: 'playing', round, roundStartAt: Date.now(),
+    explosionAt: Date.now() + delay, bombState: 'held',
+  });
+
+  if (bombTimers[roomId]) clearTimeout(bombTimers[roomId]);
+  bombTimers[roomId] = setTimeout(() => explode(roomId), delay);
+  console.log(`💣 Round ${round} in ${roomId} — ${holder} (${Math.round(delay/1000)}s)`);
+}
+
+function explodeDelay(n) {
+  const [min, max] =
+    n >= 12 ? [20000, 60000] : n >= 8 ? [15000, 45000] :
+    n >= 5  ? [10000, 30000] : n >= 3 ? [8000, 20000] : [8000, 15000];
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+async function explode(roomId) {
+  const snap = await db.ref(`passBombRooms/${roomId}`).once('value');
+  const room = snap.val();
+  if (!room || room.status !== 'playing' || !room.currentBombHolder) return;
+
+  const holder = room.currentBombHolder;
+  const players = room.players || {};
+  const eliminated = Object.values(players).filter(p => p?.alive === false).length + 1;
+
+  await db.ref(`passBombRooms/${roomId}`).update({
+    bombState: 'exploded',
+    [`players/${holder}/alive`]: false,
+    [`players/${holder}/eliminationOrder`]: eliminated,
+  });
+  console.log(`💥 ${holder} ELIMINATED #${eliminated} in ${roomId}`);
+
+  setTimeout(async () => {
+    const s = await db.ref(`passBombRooms/${roomId}`).once('value');
+    const r = s.val();
+    if (!r || r.status !== 'playing') return;
+    const alive = Object.keys(r.players || {}).filter(u => r.players[u]?.alive !== false);
+    alive.length <= 1 ? endGame(roomId, alive[0] || null) :
+      db.ref(`passBombRooms/${roomId}/status`).set('countdown');
+  }, 3000);
+}
+
+async function endGame(roomId, winnerUid) {
+  await db.ref(`passBombRooms/${roomId}`).update({ status: 'finished', winner: winnerUid || '' });
+  if (bombTimers[roomId]) clearTimeout(bombTimers[roomId]);
+  delete bombTimers[roomId];
+  console.log(`🏆 Winner ${winnerUid} in ${roomId}`);
+  setTimeout(() => db.ref(`passBombRooms/${roomId}`).remove(), 2 * 60 * 60 * 1000);
+}
+
+// Start recovery
+recoverBombTimers();
+
+// ── Truth or Dare Live Engine ─────────────────────────────────
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function alivePlayers(room) {
+  return Object.keys(room.players || {}).filter(u => room.players[u]?.online !== false);
+}
+
+// On game start → pick random starter
+db.ref('truthOrDareRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  const prev = snap.previous.val();
+  if (!room || room.status !== 'playing' || prev?.status === 'playing') return;
+
+  const alive = alivePlayers(room);
+  if (alive.length === 0) return;
+
+  const starter = pickRandom(alive);
+  await snap.ref.child('currentSpinner').set(starter);
+  await snap.ref.child('turnPhase').set('spin');
+  await snap.ref.child('selectedPlayer').set(null);
+
+  // Post system message
+  const name = room.players?.[starter]?.name || 'Someone';
+  const msgRef = db.ref(`chats/truthOrDare_${roomId}`).push();
+  await msgRef.set({
+    type: 'system', text: `🎯 ${name} starts the game!`, senderName: name,
+    timestamp: Date.now(),
+  });
+  console.log(`🎯 Truth or Dare started in ${roomId} — starter: ${starter}`);
+});
+
+// On spinRequest → pick random target
+db.ref('truthOrDareRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'playing') return;
+  const req = room.spinRequest;
+  if (!req?.by) return;
+
+  const by = room.players?.[req.by];
+  if (!by || by.online === false) {
+    await snap.ref.child('spinRequest').remove();
+    return;
+  }
+
+  const alive = alivePlayers(room).filter(u => u !== req.by);
+  if (alive.length === 0) {
+    await snap.ref.child('spinRequest').remove();
+    return;
+  }
+
+  const target = pickRandom(alive);
+  await snap.ref.child('selectedPlayer').set(target);
+  await snap.ref.child('turnPhase').set('choose');
+  await snap.ref.child('spinRequest').remove();
+
+  const spinnerName = by.name || 'Someone';
+  const targetName = room.players?.[target]?.name || 'Someone';
+  const msgRef = db.ref(`chats/truthOrDare_${roomId}`).push();
+  await msgRef.set({
+    type: 'system', text: `🍾 ${spinnerName} spun the bottle → ${targetName}!`,
+    senderName: spinnerName, timestamp: Date.now(),
+  });
+  console.log(`🍾 ${spinnerName} → ${targetName} in ${roomId}`);
+});
+
+// On player removal (online=false) → handle spinner/selected exit
+db.ref('truthOrDareRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'playing') return;
+
+  // Check if any player went offline recently
+  const prev = snap.previous.val();
+  if (!prev) return;
+
+  for (const uid of Object.keys(room.players || {})) {
+    const wasOnline = prev.players?.[uid]?.online !== false;
+    const nowOnline = room.players?.[uid]?.online !== false;
+    if (wasOnline && !nowOnline) {
+      const name = room.players?.[uid]?.name || 'Someone';
+      const msgRef = db.ref(`chats/truthOrDare_${roomId}`).push();
+      await msgRef.set({
+        type: 'system', text: `🚪 ${name} left the game.`,
+        senderName: name, timestamp: Date.now(),
+      });
+
+      const alive = alivePlayers(room);
+
+      // If spinner left → reassign
+      if (room.currentSpinner === uid) {
+        if (alive.length <= 1) return endTruthOrDare(roomId, room);
+
+        const newSpinner = pickRandom(alive);
+        await snap.ref.child('currentSpinner').set(newSpinner);
+        await snap.ref.child('turnPhase').set('spin');
+        await snap.ref.child('selectedPlayer').set(null);
+        const newName = room.players?.[newSpinner]?.name || 'Someone';
+        const m2 = db.ref(`chats/truthOrDare_${roomId}`).push();
+        await m2.set({
+          type: 'system', text: `${name} left. ${newName} now controls the bottle.`,
+          senderName: name, timestamp: Date.now(),
+        });
+        console.log(`🔄 Spinner ${uid} left in ${roomId} → reassigned to ${newSpinner}`);
+      }
+
+      // If selected player left → cancel round
+      if (room.selectedPlayer === uid && alive.length > 1) {
+        await snap.ref.child('selectedPlayer').set(null);
+        await snap.ref.child('turnPhase').set('spin');
+        const m3 = db.ref(`chats/truthOrDare_${roomId}`).push();
+        await m3.set({
+          type: 'system', text: `${name} left. Round cancelled — spin again!`,
+          senderName: name, timestamp: Date.now(),
+        });
+      }
+
+      // If ≤2 alive and someone leaves → check for match end
+      if (alive.length <= 2) {
+        await db.ref(`truthOrDareRooms/${roomId}/exitRequest`).set({
+          uid: uid, name: name, timestamp: Date.now(),
+        });
+      }
+    }
+  }
+});
+
+// On exitRequest from last player (≤2 alive)
+db.ref('truthOrDareRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'playing') return;
+  const er = room.exitRequest;
+  if (!er?.confirmed) return;
+
+  await snap.ref.child('exitRequest').remove();
+  await endTruthOrDare(roomId, room);
+});
+
+async function endTruthOrDare(roomId, room) {
+  const updates = { status: 'finished', endedAt: Date.now() };
+  await db.ref(`truthOrDareRooms/${roomId}`).update(updates);
+
+  const msgRef = db.ref(`chats/truthOrDare_${roomId}`).push();
+  await msgRef.set({
+    type: 'system', text: 'Match ended. Session saved.',
+    senderName: '', timestamp: Date.now(),
+  });
+  console.log(`🎭 Truth or Dare ended in ${roomId}`);
+
+  // Auto-cleanup after 24h
+  setTimeout(() => db.ref(`truthOrDareRooms/${roomId}`).remove(), 24 * 60 * 60 * 1000);
+}
+
+// ── Pass The Card Game Engine ────────────────────────────────
+
+const ptcTimers = {};
+const PTC_TURN_TIME = 10000;
+const PTC_SELECT_TIME = 15000;
+const PTC_CARD_TYPES = [0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3];
+
+function shuffleDeck() {
+  const deck = [...PTC_CARD_TYPES];
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  return deck;
+}
+
+function nextClockwise(players, currentUid) {
+  const uids = Object.keys(players).sort((a, b) => (players[a].position || 0) - (players[b].position || 0));
+  const idx = uids.indexOf(currentUid);
+  return uids[(idx + 1) % uids.length];
+}
+
+async function recoverPtcTimers() {
+  const snap = await db.ref('passTheCardRooms').once('value');
+  if (!snap.exists()) return;
+  snap.forEach(child => {
+    const room = child.val();
+    const roomId = child.key;
+    if (room.status === 'selecting' && room.selectionEndAt) {
+      const remaining = room.selectionEndAt - Date.now();
+      if (remaining > 0) {
+        ptcTimers[roomId] = setTimeout(() => autoAssignPtcCards(roomId), remaining);
+        console.log(`🔁 Recovered PTC selection ${roomId} (${Math.round(remaining/1000)}s)`);
+      } else {
+        autoAssignPtcCards(roomId);
+      }
+    } else if (room.status === 'playing' && room.turnEndAt) {
+      const remaining = room.turnEndAt - Date.now();
+      if (remaining > 0) {
+        ptcTimers[`turn_${roomId}`] = setTimeout(() => afkPtcPass(roomId), remaining);
+        console.log(`🔁 Recovered PTC turn ${roomId} (${Math.round(remaining/1000)}s)`);
+      } else {
+        afkPtcPass(roomId);
+      }
+    }
+  });
+}
+
+db.ref('passTheCardRooms').on('child_added', async (snap) => {
+  const room = snap.val();
+  if (!room || room.createdAt) return;
+  await snap.ref.child('createdAt').set(Date.now());
+});
+
+db.ref('passTheCardRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  const prev = snap.previous.val();
+  if (!room || room.status !== 'selecting' || prev?.status === 'selecting') return;
+
+  const players = room.players || {};
+  const uids = Object.keys(players);
+  const posUpdates = {};
+  uids.forEach((uid, i) => { posUpdates[`players/${uid}/position`] = i; });
+  posUpdates.selectionEndAt = Date.now() + PTC_SELECT_TIME;
+  posUpdates.turnsPlayed = 0;
+  posUpdates.cardsPassed = 0;
+
+  const deck = shuffleDeck();
+  deck.forEach((typeId, i) => { posUpdates[`cardPool/${i}`] = typeId; });
+
+  await snap.ref.update(posUpdates);
+
+  if (ptcTimers[roomId]) clearTimeout(ptcTimers[roomId]);
+  ptcTimers[roomId] = setTimeout(() => autoAssignPtcCards(roomId), PTC_SELECT_TIME);
+  console.log(`🃏 PTC selecting in ${roomId} — 15s`);
+});
+
+db.ref('passTheCardRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'selecting') return;
+  const sel = room.selectedPositions || {};
+  const players = room.players || {};
+  const allSelected = Object.keys(players).length >= 4 &&
+    Object.keys(players).every(uid => Array.isArray(sel[uid]) && sel[uid].length >= 4);
+  if (!allSelected) return;
+
+  if (ptcTimers[roomId]) clearTimeout(ptcTimers[roomId]);
+  delete ptcTimers[roomId];
+  assignPtcCards(roomId, room);
+});
+
+async function autoAssignPtcCards(roomId) {
+  const snap = await db.ref(`passTheCardRooms/${roomId}`).once('value');
+  const room = snap.val();
+  if (!room || room.status !== 'selecting') return;
+  delete ptcTimers[roomId];
+
+  const sel = room.selectedPositions || {};
+  const players = room.players || {};
+  const allPositions = new Set(Array.from({length: 16}, (_, i) => i));
+
+  for (const uid of Object.keys(players)) {
+    if (Array.isArray(sel[uid])) sel[uid].forEach(p => allPositions.delete(p));
+  }
+
+  const remaining = Array.from(allPositions);
+  for (const uid of Object.keys(players)) {
+    if (!Array.isArray(sel[uid]) || sel[uid].length < 4) {
+      const needed = 4 - (sel[uid]?.length || 0);
+      const picks = remaining.splice(0, needed);
+      if (!sel[uid]) sel[uid] = [];
+      sel[uid].push(...picks);
+      await db.ref(`passTheCardRooms/${roomId}/selectedPositions/${uid}`).set(sel[uid]);
+    }
+  }
+
+  assignPtcCards(roomId, await db.ref(`passTheCardRooms/${roomId}`).once('value'));
+}
+
+async function assignPtcCards(roomId, snapOrRoom) {
+  const snap = snapOrRoom.val ? snapOrRoom : await db.ref(`passTheCardRooms/${roomId}`).once('value');
+  const room = snap.val();
+  if (!room || room.status !== 'selecting') return;
+
+  const sel = room.selectedPositions || {};
+  const players = room.players || {};
+  const pool = room.cardPool;
+  if (!pool) return;
+
+  const updates = {};
+  for (const uid of Object.keys(players)) {
+    const positions = sel[uid];
+    if (!Array.isArray(positions) || positions.length < 4) continue;
+    const hand = positions.map(pos => pool[pos]);
+    updates[`players/${uid}/hand`] = hand;
+  }
+
+  updates.status = 'playing';
+  updates.currentTurn = room.hostUid;
+  updates.turnEndAt = Date.now() + PTC_TURN_TIME;
+  updates.startedAt = Date.now();
+
+  await db.ref(`passTheCardRooms/${roomId}`).update(updates);
+
+  if (ptcTimers[`turn_${roomId}`]) clearTimeout(ptcTimers[`turn_${roomId}`]);
+  ptcTimers[`turn_${roomId}`] = setTimeout(() => afkPtcPass(roomId), PTC_TURN_TIME);
+  console.log(`🃏 PTC playing ${roomId} — turn: ${room.hostUid}`);
+}
+
+db.ref('passTheCardRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'playing') return;
+  const pass = room.passAction;
+  if (!pass || pass.cardIndex === undefined) return;
+
+  const fromUid = room.currentTurn;
+  const players = room.players || {};
+  const fromHand = players[fromUid]?.hand;
+  if (!Array.isArray(fromHand) || pass.cardIndex < 0 || pass.cardIndex >= fromHand.length) {
+    await snap.ref.child('passAction').remove();
+    return;
+  }
+
+  const toUid = nextClockwise(players, fromUid);
+  const toHand = players[toUid]?.hand || [];
+  const card = fromHand[pass.cardIndex];
+
+  const newFromHand = [...fromHand];
+  newFromHand.splice(pass.cardIndex, 1);
+  const newToHand = [...toHand, card];
+
+  const updates = {};
+  updates[`players/${fromUid}/hand`] = newFromHand;
+  updates[`players/${toUid}/hand`] = newToHand;
+  updates.currentTurn = toUid;
+  updates.turnEndAt = Date.now() + PTC_TURN_TIME;
+  updates.turnsPlayed = (room.turnsPlayed || 0) + 1;
+  updates.cardsPassed = (room.cardsPassed || 0) + 1;
+  updates.recentPass = { fromUid, toUid, card, timestamp: Date.now() };
+  updates.passAction = null;
+
+  await db.ref(`passTheCardRooms/${roomId}`).update(updates);
+
+  if (ptcTimers[`turn_${roomId}`]) clearTimeout(ptcTimers[`turn_${roomId}`]);
+  ptcTimers[`turn_${roomId}`] = setTimeout(() => afkPtcPass(roomId), PTC_TURN_TIME);
+  console.log(`🃏 ${fromUid}→${toUid} 🃏 in ${roomId} (turn ${room.turnsPlayed + 1})`);
+});
+
+db.ref('passTheCardRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'playing') return;
+  const revealBy = room.revealRequest;
+  if (!revealBy) return;
+
+  const hand = room.players?.[revealBy]?.hand;
+  if (!Array.isArray(hand) || hand.length !== 4 || !hand.every(c => c === hand[0])) {
+    await snap.ref.update({ revealRequest: null, revealResult: 'invalid' });
+    console.log(`❌ Invalid reveal by ${revealBy} in ${roomId}`);
+    return;
+  }
+
+  if (ptcTimers[`turn_${roomId}`]) clearTimeout(ptcTimers[`turn_${roomId}`]);
+  delete ptcTimers[`turn_${roomId}`];
+
+  await snap.ref.update({
+    winner: revealBy,
+    status: 'finished',
+    revealRequest: null,
+    revealResult: 'valid',
+    endedAt: Date.now(),
+  });
+  console.log(`🏆 PTC winner ${revealBy} in ${roomId}`);
+
+  setTimeout(() => db.ref(`passTheCardRooms/${roomId}`).remove(), 2 * 60 * 60 * 1000);
+});
+
+async function afkPtcPass(roomId) {
+  const snap = await db.ref(`passTheCardRooms/${roomId}`).once('value');
+  const room = snap.val();
+  if (!room || room.status !== 'playing') return;
+  delete ptcTimers[`turn_${roomId}`];
+
+  const fromUid = room.currentTurn;
+  const fromHand = room.players?.[fromUid]?.hand;
+  if (!Array.isArray(fromHand) || fromHand.length === 0) return;
+
+  const randIdx = Math.floor(Math.random() * fromHand.length);
+  const card = fromHand[randIdx];
+  const players = room.players || {};
+  const toUid = nextClockwise(players, fromUid);
+  const toHand = players[toUid]?.hand || [];
+
+  const newFromHand = [...fromHand];
+  newFromHand.splice(randIdx, 1);
+  const newToHand = [...toHand, card];
+
+  const updates = {};
+  updates[`players/${fromUid}/hand`] = newFromHand;
+  updates[`players/${toUid}/hand`] = newToHand;
+  updates.currentTurn = toUid;
+  updates.turnEndAt = Date.now() + PTC_TURN_TIME;
+  updates.turnsPlayed = (room.turnsPlayed || 0) + 1;
+  updates.cardsPassed = (room.cardsPassed || 0) + 1;
+  updates.recentPass = { fromUid, toUid, card, timestamp: Date.now(), afk: true };
+  updates.afkMessage = fromUid;
+
+  await db.ref(`passTheCardRooms/${roomId}`).update(updates);
+
+  ptcTimers[`turn_${roomId}`] = setTimeout(() => afkPtcPass(roomId), PTC_TURN_TIME);
+  console.log(`⏰ AFK ${fromUid} auto-passed in ${roomId}`);
+}
+
+// Player removed → end game
+db.ref('passTheCardRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status === 'finished') return;
+  const players = room.players || {};
+  const uids = Object.keys(players);
+  if (uids.length < 4) {
+    if (ptcTimers[roomId]) clearTimeout(ptcTimers[roomId]);
+    if (ptcTimers[`turn_${roomId}`]) clearTimeout(ptcTimers[`turn_${roomId}`]);
+    delete ptcTimers[roomId];
+    delete ptcTimers[`turn_${roomId}`];
+    await db.ref(`passTheCardRooms/${roomId}`).update({
+      winner: null, status: 'finished', endedAt: Date.now(),
+    });
+    console.log(`🚪 PTC cancelled ${roomId} — player left`);
+    setTimeout(() => db.ref(`passTheCardRooms/${roomId}`).remove(), 2 * 60 * 60 * 1000);
+  }
+});
+
+recoverPtcTimers();
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server on port ${PORT}`));

@@ -3,9 +3,11 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 import '../app_theme.dart';
 import '../services/auth_service.dart';
+import '../services/live_location_service.dart';
 
 class LiveLocationScreen extends StatefulWidget {
   const LiveLocationScreen({super.key});
@@ -16,13 +18,10 @@ class LiveLocationScreen extends StatefulWidget {
 class _LiveLocationScreenState extends State<LiveLocationScreen> {
   final _db = FirebaseDatabase.instance;
   final MapController _mapCtrl = MapController();
-  String _myUid = '', _myName = '', _myPhoto = '', _myRole = 'member';
-  bool _sharing = false;
-  bool _visibleToAll = true;
-  StreamSubscription<Position>? _posSub;
+  String _myUid = '', _myName = '', _myPhoto = '';
+  final _service = LiveLocationService.instance;
   Map<String, Map<String, dynamic>> _cousins = {};
   LatLng? _myPos;
-  Timer? _cleanupTimer;
   String? _selectedUid;
   bool _gpsError = false;
 
@@ -31,6 +30,12 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
     super.initState();
     _init();
     _listenLocations();
+    _service.locationStream.listen((pos) {
+      if (mounted) setState(() {
+        _myPos = LatLng(pos.latitude, pos.longitude);
+        _gpsError = false;
+      });
+    });
   }
 
   Future<void> _init() async {
@@ -39,11 +44,9 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
     if (p != null && mounted) setState(() {
       _myName = p['nickname'] ?? p['name'] ?? 'Cousin';
       _myPhoto = p['photoUrl'] ?? '';
-      _myRole = p['role'] ?? 'member';
     });
+    _service.init(uid: _myUid, name: _myName, photo: _myPhoto);
   }
-
-  bool get _isAdmin => _myRole == 'admin';
 
   void _listenLocations() {
     _db.ref('liveLocations').onValue.listen((e) {
@@ -56,11 +59,7 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
         final data = Map<String, dynamic>.from(val as Map);
         final ts = (data['timestamp'] ?? 0) as int;
         if (now - ts > 5 * 60 * 1000) return;
-        final visible = data['visibleToAll'] == true;
-
-        if (uid == _myUid || _isAdmin || visible) {
-          active[uid] = data;
-        }
+        active[uid] = data;
       });
 
       if (mounted) setState(() => _cousins = active);
@@ -80,59 +79,57 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
   }
 
   Future<void> _toggleSharing() async {
-    if (_sharing) {
-      await _posSub?.cancel();
-      await _db.ref('liveLocations/$_myUid').remove();
-      setState(() { _sharing = false; _myPos = null; _gpsError = false; });
+    if (_service.isSharing) {
+      await _service.stop();
+      setState(() => _myPos = null);
       return;
-    }
-
-    final perm = await Geolocator.checkPermission();
-    if (perm == LocationPermission.denied) {
-      final req = await Geolocator.requestPermission();
-      if (req == LocationPermission.denied || req == LocationPermission.deniedForever) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permission denied. Enable in Settings.')));
-        return;
-      }
     }
 
     if (!await Geolocator.isLocationServiceEnabled()) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enable GPS location.')));
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('📍', style: TextStyle(fontSize: 56)),
+            const SizedBox(height: 12),
+            const Text('Turn on Location',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 8),
+            const Text('This app needs location access to share your live location with family.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.black54)),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await openAppSettings();
+                  if (mounted) _toggleSharing();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100)),
+                  padding: const EdgeInsets.symmetric(vertical: 14)),
+                child: const Text('Turn On', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800))),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Not now', style: TextStyle(color: Colors.black54))),
+          ])));
       return;
     }
 
-    setState(() { _sharing = true; _gpsError = false; });
-
-    _posSub = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-      )).listen((pos) async {
-      if (!mounted) return;
-      final latLng = LatLng(pos.latitude, pos.longitude);
-      setState(() { _myPos = latLng; _gpsError = false; });
-      await _db.ref('liveLocations/$_myUid').set({
-        'lat': pos.latitude,
-        'lng': pos.longitude,
-        'name': _myName,
-        'photo': _myPhoto,
-        'accuracy': pos.accuracy,
-        'visibleToAll': _visibleToAll,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
-    }, onError: (_) {
-      if (mounted) setState(() => _gpsError = true);
-    });
-
-    _cleanupTimer = Timer(const Duration(hours: 2), () => _toggleSharing());
-  }
-
-  void _toggleVisibility() {
-    setState(() => _visibleToAll = !_visibleToAll);
-    if (_sharing) {
-      _db.ref('liveLocations/$_myUid/visibleToAll').set(_visibleToAll);
+    final started = await _service.start();
+    if (!started && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location permission is required.')));
     }
   }
 
@@ -160,9 +157,7 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: isMe ? AppTheme.mainGradient : null,
-                color: isMe ? null : _isAdmin && data['visibleToAll'] != true
-                    ? const Color(0xFF9E9E9E)
-                    : const Color(0xFF1E88E5),
+                color: isMe ? null : const Color(0xFF1E88E5),
                 border: Border.all(
                   color: isSelected ? Colors.amber : Colors.white,
                   width: isSelected ? 3 : 2.5),
@@ -254,19 +249,12 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
   }
 
   @override
-  void dispose() {
-    _posSub?.cancel();
-    _cleanupTimer?.cancel();
-    if (_sharing) _db.ref('liveLocations/$_myUid').remove();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final activeCount = _cousins.length;
     final sortedMembers = _cousins.entries.toList()
       ..sort((a, b) => a.value['name']?.toString().compareTo(
              b.value['name']?.toString() ?? '') ?? 0);
+    final sharing = _service.isSharing;
 
     return Scaffold(
       appBar: AppBar(
@@ -311,18 +299,11 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
                 final d = e.value;
                 final name = d['name'] ?? 'Cousin';
                 final isMe = uid == _myUid;
-                final hidden = _isAdmin && d['visibleToAll'] != true;
                 return DropdownMenuItem(
                   value: uid,
-                  child: Row(children: [
-                    if (hidden) const Icon(Icons.visibility_off, size: 14,
-                      color: Colors.grey),
-                    if (hidden) const SizedBox(width: 6),
-                    Text(isMe ? '$name (You)' : name,
-                      style: TextStyle(fontSize: 13,
-                        fontWeight: isMe ? FontWeight.w700 : FontWeight.w400,
-                        color: hidden ? Colors.grey : Colors.black87)),
-                  ]));
+                  child: Text(isMe ? '$name (You)' : name,
+                    style: TextStyle(fontSize: 13,
+                      fontWeight: isMe ? FontWeight.w700 : FontWeight.w400)));
               }).toList(),
               onChanged: (val) {
                 setState(() => _selectedUid = val);
@@ -350,7 +331,7 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
             ]),
 
           // GPS error banner
-          if (_gpsError && _sharing)
+          if (_gpsError && sharing)
             Positioned(top: 8, left: 16, right: 16,
               child: Container(
                 padding: const EdgeInsets.all(10),
@@ -377,66 +358,47 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             // Online avatars
             if (_cousins.isNotEmpty) ...[
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(children: [
-                  const Text('Online:',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
-                      color: AppTheme.muted)),
-                  const SizedBox(width: 10),
-                  ..._cousins.entries.map((e) {
-                    final d = e.value;
-                    final uid = e.key;
-                    final isSelected = uid == _selectedUid;
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() => _selectedUid = uid);
-                        _mapCtrl.move(
-                          LatLng((d['lat'] as num).toDouble(),
-                                 (d['lng'] as num).toDouble()), 15);
-                      },
-                      child: Container(
-                        width: 34, height: 34,
-                        margin: const EdgeInsets.only(right: 6),
-                        decoration: BoxDecoration(
-                          gradient: isSelected ? AppTheme.mainGradient : null,
-                          color: isSelected ? null : AppTheme.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isSelected ? Colors.amber : Colors.white,
-                            width: isSelected ? 2.5 : 2)),
-                        child: (d['photo'] ?? '').isNotEmpty
-                            ? ClipOval(child: Image.network(
-                                d['photo'], fit: BoxFit.cover))
-                            : Center(child: Text(
-                                (d['name'] ?? 'C')[0].toUpperCase(),
-                                style: const TextStyle(color: Colors.white,
-                                  fontWeight: FontWeight.w700, fontSize: 13)))));
-                  }),
-                ])),
+              SizedBox(
+                height: 38,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(children: [
+                    const Text('Online:',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+                        color: AppTheme.muted)),
+                    const SizedBox(width: 10),
+                    ..._cousins.entries.map((e) {
+                      final d = e.value;
+                      final uid = e.key;
+                      final isSelected = uid == _selectedUid;
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() => _selectedUid = uid);
+                          _mapCtrl.move(
+                            LatLng((d['lat'] as num).toDouble(),
+                                   (d['lng'] as num).toDouble()), 15);
+                        },
+                        child: Container(
+                          width: 34, height: 34,
+                          margin: const EdgeInsets.only(right: 6),
+                          decoration: BoxDecoration(
+                            gradient: isSelected ? AppTheme.mainGradient : null,
+                            color: isSelected ? null : AppTheme.primary,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected ? Colors.amber : Colors.white,
+                              width: isSelected ? 2.5 : 2)),
+                          child: (d['photo'] ?? '').isNotEmpty
+                              ? ClipOval(child: Image.network(
+                                  d['photo'], fit: BoxFit.cover))
+                              : Center(child: Text(
+                                  (d['name'] ?? 'C')[0].toUpperCase(),
+                                  style: const TextStyle(color: Colors.white,
+                                    fontWeight: FontWeight.w700, fontSize: 13)))));
+                    }),
+                  ])),
+              ),
               const SizedBox(height: 12),
-            ],
-
-            // Visibility toggle (only shown when sharing)
-            if (_sharing) ...[
-              Row(children: [
-                Icon(
-                  _visibleToAll ? Icons.public : Icons.visibility_off,
-                  size: 16, color: AppTheme.muted),
-                const SizedBox(width: 6),
-                Text(
-                  _visibleToAll ? 'Visible to all members' : 'Visible to admin only',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.muted)),
-                const Spacer(),
-                SizedBox(
-                  height: 28,
-                  child: Switch.adaptive(
-                    value: _visibleToAll,
-                    onChanged: (_) => _toggleVisibility(),
-                    activeColor: AppTheme.primary,
-                  )),
-              ]),
-              const SizedBox(height: 8),
             ],
 
             // Share toggle button
@@ -447,33 +409,33 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  gradient: _sharing
+                  gradient: sharing
                       ? const LinearGradient(
                           colors: [Color(0xFFE53935), Color(0xFFFF5722)])
                       : AppTheme.mainGradient,
                   borderRadius: BorderRadius.circular(100),
                   boxShadow: [BoxShadow(
-                    color: (_sharing ? Colors.red : AppTheme.primary)
+                    color: (sharing ? Colors.red : AppTheme.primary)
                         .withOpacity(0.35),
                     blurRadius: 12, offset: const Offset(0, 4))]),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(_sharing ? Icons.location_off : Icons.my_location,
+                    Icon(sharing ? Icons.location_off : Icons.my_location,
                       color: Colors.white),
                     const SizedBox(width: 8),
                     Text(
-                      _sharing ? '🔴 Stop Sharing' : '📍 Share My Location',
+                      sharing ? '🔴 Stop Sharing' : '📍 Share My Location',
                       style: const TextStyle(color: Colors.white,
                         fontWeight: FontWeight.w800, fontSize: 15)),
                   ])),
             ),
 
-            if (_sharing)
+            if (sharing)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'Auto-stops after 2h • ${_myPos != null ? "GPS active" : "Getting location..."}',
+                  'Sharing until you stop it • ${_myPos != null ? "GPS active" : "Getting location..."}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 11, color: AppTheme.soft))),
           ]),
