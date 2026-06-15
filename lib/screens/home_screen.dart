@@ -20,6 +20,7 @@ import 'tictactoe_invite_screen.dart';
 import 'tictactoe_game_screen.dart';
 import 'pass_the_bomb_lobby_screen.dart';
 import 'pass_the_card_lobby_screen.dart';
+import 'spy_chat_lobby_screen.dart';
 import 'truth_or_dare_lobby_screen.dart';
 import 'story_screen.dart';
 import 'badges_screen.dart';
@@ -205,6 +206,22 @@ class _HomeScreenState extends State<HomeScreen> {
           await FirebaseDatabase.instance.ref('passTheCardInvites/$uid/$roomId').remove();
         });
     });
+
+    // Spy Chat invites
+    FirebaseDatabase.instance.ref('spyChatInvites/$uid').onChildAdded.listen((e) {
+      if (!e.snapshot.exists || !mounted) return;
+      final inv = Map<String, dynamic>.from(e.snapshot.value as Map);
+      final roomId = inv['roomId'] as String? ?? e.snapshot.key ?? '';
+      _showInviteDialog('🕵️', inv['hostName'] ?? 'Cousin', 'Spy Chat 🕵️',
+        onAccept: () async {
+          await FirebaseDatabase.instance.ref('spyChatInvites/$uid/$roomId').remove();
+          if (mounted) Navigator.push(context, MaterialPageRoute(
+            builder: (_) => SpyChatLobbyScreen(roomId: roomId, isHost: false)));
+        },
+        onDecline: () async {
+          await FirebaseDatabase.instance.ref('spyChatInvites/$uid/$roomId').remove();
+        });
+    });
   }
 
   void _showInviteDialog(String emoji, String from, String subtitle,
@@ -384,6 +401,7 @@ class _HomeBody extends StatelessWidget {
           _Card('💣', 'Pass The Bomb', const Color(0xFF4A0E4E), () => _go(context, const PassTheBombLobbyScreen()), light: false),
           _Card('🎭', 'Truth or Dare', const Color(0xFF2D1B69), () => _go(context, const TruthOrDareLobbyScreen()), light: false),
           _Card('🃏', 'Pass The Card', const Color(0xFF1B3A1B), () => _go(context, const PassTheCardLobbyScreen()), light: false),
+          _Card('🕵️', 'Spy Chat', const Color(0xFF2D1B4E), () => _go(context, const SpyChatLobbyScreen()), light: false),
           _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
           _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
           _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),

@@ -709,5 +709,358 @@ db.ref('passTheCardRooms').on('child_changed', async (snap) => {
 
 recoverPtcTimers();
 
+// ── Spy Chat Game Engine ────────────────────────────────────
+
+const SPY_WORD_BANK = [
+  { c: 'Instagram', s: 'Facebook' }, { c: 'Pizza', s: 'Pasta' },
+  { c: 'Beach', s: 'Pool' }, { c: 'Netflix', s: 'YouTube' },
+  { c: 'iPhone', s: 'Samsung' }, { c: 'Tesla', s: 'Ford' },
+  { c: 'Coca Cola', s: 'Pepsi' }, { c: 'Nike', s: 'Adidas' },
+  { c: 'Spotify', s: 'Apple Music' }, { c: 'WhatsApp', s: 'Telegram' },
+  { c: 'Disney', s: 'Universal' }, { c: 'Burger King', s: 'McDonalds' },
+  { c: 'PlayStation', s: 'Xbox' }, { c: 'Marvel', s: 'DC' },
+  { c: 'Harry Potter', s: 'Lord of the Rings' }, { c: 'Star Wars', s: 'Star Trek' },
+  { c: 'Cats', s: 'Dogs' }, { c: 'Summer', s: 'Spring' },
+  { c: 'Mountains', s: 'Forest' }, { c: 'Cake', s: 'Pie' },
+  { c: 'Coffee', s: 'Tea' }, { c: 'Rain', s: 'Snow' },
+  { c: 'Dragon', s: 'Phoenix' }, { c: 'Tiger', s: 'Lion' },
+  { c: 'Ocean', s: 'Lake' }, { c: 'Guitar', s: 'Piano' },
+  { c: 'Football', s: 'Basketball' }, { c: 'Sunflower', s: 'Rose' },
+  { c: 'Diamond', s: 'Ruby' }, { c: 'Bicycle', s: 'Motorcycle' },
+  { c: 'Carrot', s: 'Potato' }, { c: 'Eclipse', s: 'Aurora' },
+  { c: 'Compass', s: 'Map' }, { c: 'Lantern', s: 'Torch' },
+  { c: 'Rainbow', s: 'Sunset' }, { c: 'Castle', s: 'Palace' },
+  { c: 'Mermaid', s: 'Siren' }, { c: 'Wizard', s: 'Sorcerer' },
+  { c: 'Rocket', s: 'Satellite' }, { c: 'Submarine', s: 'Spaceship' },
+  { c: 'Penguin', s: 'Polar Bear' }, { c: 'Giraffe', s: 'Camel' },
+  { c: 'Butterfly', s: 'Dragonfly' }, { c: 'Volcano', s: 'Geyser' },
+  { c: 'Maze', s: 'Puzzle' }, { c: 'Kite', s: 'Balloon' },
+  { c: 'Carousel', s: 'Ferris Wheel' }, { c: 'Trampoline', s: 'Slide' },
+  { c: 'YouTube', s: 'TikTok' }, { c: 'Snapchat', s: 'Instagram' },
+  { c: 'Twitter', s: 'Reddit' }, { c: 'LinkedIn', s: 'Indeed' },
+  { c: 'Amazon', s: 'eBay' }, { c: 'Uber', s: 'Lyft' },
+  { c: 'Airbnb', s: 'Hotel' }, { c: 'Sushi', s: 'Ramen' },
+  { c: 'Burgers', s: 'Hot Dogs' }, { c: 'Chocolate', s: 'Caramel' },
+  { c: 'Popcorn', s: 'Chips' }, { c: 'Milkshake', s: 'Smoothie' },
+  { c: 'Clock', s: 'Calendar' }, { c: 'Mirror', s: 'Window' },
+  { c: 'Book', s: 'Journal' }, { c: 'Candle', s: 'Incense' },
+  { c: 'Hammock', s: 'Swing' }, { c: 'Canoe', s: 'Kayak' },
+  { c: 'Glacier', s: 'Iceberg' }, { c: 'Coral', s: 'Seaweed' },
+  { c: 'Mushroom', s: 'Fungi' }, { c: 'Pineapple', s: 'Coconut' },
+  { c: 'Cherry', s: 'Strawberry' }, { c: 'Lemon', s: 'Lime' },
+  { c: 'Basil', s: 'Mint' }, { c: 'Cinnamon', s: 'Nutmeg' },
+  { c: 'Soap', s: 'Shampoo' }, { c: 'Towel', s: 'Blanket' },
+  { c: 'Sunglasses', s: 'Hat' }, { c: 'Backpack', s: 'Suitcase' },
+  { c: 'Stapler', s: 'Glue' }, { c: 'Scissors', s: 'Knife' },
+  { c: 'Ruler', s: 'Tape Measure' }, { c: 'Binoculars', s: 'Telescope' },
+  { c: 'Microscope', s: 'Magnifying Glass' }, { c: 'Alarm', s: 'Siren' },
+  { c: 'Ladder', s: 'Stairs' }, { c: 'Bridge', s: 'Tunnel' },
+  { c: 'Fountain', s: 'Waterfall' }, { c: 'Pebble', s: 'Boulder' },
+  { c: 'Feather', s: 'Leaf' }, { c: 'Nest', s: 'Hive' },
+  { c: 'Battery', s: 'Solar Panel' }, { c: 'Wheel', s: 'Gear' },
+  { c: 'Key', s: 'Lock' }, { c: 'Shoe', s: 'Sock' },
+  { c: 'Glove', s: 'Mitten' }, { c: 'Belt', s: 'Suspenders' },
+  { c: 'Pillow', s: 'Cushion' }, { c: 'Rug', s: 'Carpet' },
+  { c: 'Fence', s: 'Wall' }, { c: 'Gate', s: 'Door' },
+  { c: 'Lighthouse', s: 'Watchtower' }, { c: 'Anchor', s: 'Chain' },
+];
+
+const spTimers = {};
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function spyCount(total) {
+  if (total <= 6) return 1;
+  if (total <= 10) return 2;
+  return 3;
+}
+
+async function recoverSpTimers() {
+  const snap = await db.ref('spyChatRooms').once('value');
+  if (!snap.exists()) return;
+  snap.forEach(child => {
+    const room = child.val();
+    const roomId = child.key;
+    if (room.status === 'discussion' && room.discussionEndAt) {
+      const remaining = room.discussionEndAt - Date.now();
+      if (remaining > 0) {
+        spTimers[`discuss_${roomId}`] = setTimeout(() => endDiscussion(roomId, room), remaining);
+        console.log(`🔁 Recovered SP discussion ${roomId} (${Math.round(remaining/1000)}s)`);
+      } else {
+        endDiscussion(roomId, room);
+      }
+    } else if (room.status === 'voting' && room.votingEndAt) {
+      const remaining = room.votingEndAt - Date.now();
+      if (remaining > 0) {
+        spTimers[`vote_${roomId}`] = setTimeout(() => tallyVotes(roomId), remaining);
+        console.log(`🔁 Recovered SP voting ${roomId} (${Math.round(remaining/1000)}s)`);
+      } else {
+        tallyVotes(roomId);
+      }
+    } else if (room.status === 'clueSubmission' && room.clueIndex < (room.roundOrder || []).length) {
+      // Clue submission doesn't have a timer — server just waits for the next clue
+    }
+  });
+}
+
+db.ref('spyChatRooms').on('child_added', async (snap) => {
+  const room = snap.val();
+  if (!room || room.createdAt) return;
+  await snap.ref.child('createdAt').set(Date.now());
+});
+
+// Status change → wordReveal: assign roles and words
+db.ref('spyChatRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  const prev = snap.previous.val();
+  if (!room || room.status !== 'wordReveal' || prev?.status === 'wordReveal') return;
+
+  const players = room.players || {};
+  const uids = Object.keys(players);
+  const total = uids.length;
+  if (total < 5) { await snap.ref.child('status').set('waiting'); return; }
+
+  const nSpies = spyCount(total);
+  const wordPair = pickRandom(SPY_WORD_BANK);
+  const spyUids = shuffleArray(uids).slice(0, nSpies);
+
+  const updates = {};
+  for (const uid of uids) {
+    const role = spyUids.includes(uid) ? 'spy' : 'civilian';
+    const word = role === 'spy' ? wordPair.s : wordPair.c;
+    updates[`players/${uid}/role`] = role;
+    updates[`players/${uid}/word`] = word;
+    updates[`players/${uid}/alive`] = true;
+    updates[`players/${uid}/confirmedWord`] = false;
+  }
+  updates.civilianWord = wordPair.c;
+  updates.spyWord = wordPair.s;
+  updates.spyCount = nSpies;
+  updates.currentRound = 1;
+
+  await snap.ref.update(updates);
+  console.log(`🕵️ SPY CHAT ${roomId} — ${total}p ${nSpies}spy — word: ${wordPair.c}/${wordPair.s}`);
+});
+
+// All players confirmed word → start clue phase
+db.ref('spyChatRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'wordReveal') return;
+
+  const players = room.players || {};
+  const allConfirmed = Object.values(players).every(p => p?.confirmedWord === true);
+  if (!allConfirmed) return;
+
+  await startCluePhase(roomId, room);
+});
+
+async function startCluePhase(roomId, room) {
+  const alive = Object.keys(room.players || {}).filter(u => room.players[u]?.alive !== false);
+  const order = shuffleArray(alive);
+
+  const updates = {
+    status: 'clueSubmission',
+    roundOrder: order,
+    clueIndex: 0,
+    currentClueTurn: order[0] || null,
+    discussionEndAt: null,
+    votingEndAt: null,
+  };
+
+  const msgRef = db.ref(`chats/spyChat_${roomId}`).push();
+  const roundName = room.currentRound || 1;
+  msgRef.set({
+    type: 'system', text: `Round ${roundName} — ${order[0]} submits first clue`,
+    senderName: '', timestamp: Date.now(),
+  });
+
+  await db.ref(`spyChatRooms/${roomId}`).update(updates);
+  console.log(`🕵️ Clue phase ${roomId} — ${order[0]} first`);
+}
+
+// Clue submission → detect when player submits and advance
+db.ref('spyChatRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status !== 'clueSubmission') return;
+
+  const clueCount = Object.keys(room.clueMessages || {}).length;
+  const prev = snap.previous.val();
+  const prevCount = Object.keys(prev?.clueMessages || {}).length;
+
+  if (clueCount <= prevCount) return; // no new clue
+
+  const alive = Object.keys(room.players || {}).filter(u => room.players[u]?.alive !== false);
+  const order = room.roundOrder || [];
+  const idx = (room.clueIndex || 0) + 1;
+
+  if (idx >= alive.length) {
+    // All clues submitted → start discussion
+    const discussTime = 90 * 1000;
+    await db.ref(`spyChatRooms/${roomId}`).update({
+      status: 'discussion',
+      discussionEndAt: Date.now() + discussTime,
+      currentClueTurn: null,
+    });
+    const msgRef = db.ref(`chats/spyChat_${roomId}`).push();
+    msgRef.set({
+      type: 'system', text: 'All clues submitted! Discussion begins now.',
+      senderName: '', timestamp: Date.now(),
+    });
+    spTimers[`discuss_${roomId}`] = setTimeout(() => endDiscussion(roomId, room), discussTime);
+    console.log(`🕵️ Discussion ${roomId} — ${discussTime/1000}s`);
+  } else {
+    const nextPlayer = shuffleArray(alive.filter(u => !order.slice(0, idx).includes(u)))[0];
+    // Use order-based selection, but ensure no repeats
+    const nextUid = order[idx];
+    await db.ref(`spyChatRooms/${roomId}`).update({
+      clueIndex: idx,
+      currentClueTurn: nextUid,
+    });
+    console.log(`🕵️ Clue ${idx + 1}/${alive.length} in ${roomId} — next: ${nextUid}`);
+  }
+});
+
+async function endDiscussion(roomId, room) {
+  const snap = room ? {val: () => room} : await db.ref(`spyChatRooms/${roomId}`).once('value');
+  room = snap.val();
+  if (!room || room.status !== 'discussion') return;
+  delete spTimers[`discuss_${roomId}`];
+
+  const voteTime = 30 * 1000;
+  await db.ref(`spyChatRooms/${roomId}`).update({
+    status: 'voting',
+    votingEndAt: Date.now() + voteTime,
+  });
+  const msgRef = db.ref(`chats/spyChat_${roomId}`).push();
+  msgRef.set({
+    type: 'system', text: '🗳️ Voting time! Choose who to eliminate.',
+    senderName: '', timestamp: Date.now(),
+  });
+
+  spTimers[`vote_${roomId}`] = setTimeout(() => tallyVotes(roomId), voteTime);
+  console.log(`🕵️ Voting ${roomId} — ${voteTime/1000}s`);
+}
+
+async function tallyVotes(roomId) {
+  const snap = await db.ref(`spyChatRooms/${roomId}`).once('value');
+  const room = snap.val();
+  if (!room || room.status !== 'voting') return;
+  delete spTimers[`vote_${roomId}`];
+
+  // Count votes
+  const votes = room.votes || {};
+  const tally = {};
+  for (const target of Object.values(votes)) {
+    tally[target] = (tally[target] || 0) + 1;
+  }
+
+  // Find max
+  let maxVotes = 0, eliminated = null, tie = false;
+  for (const [uid, count] of Object.entries(tally)) {
+    if (count > maxVotes) { maxVotes = count; eliminated = uid; tie = false; }
+    else if (count === maxVotes && count > 0) { tie = true; }
+  }
+
+  const msgRef = db.ref(`chats/spyChat_${roomId}`).push();
+
+  if (tie || !eliminated || maxVotes === 0) {
+    // Tie or no votes → no elimination
+    msgRef.set({
+      type: 'system', text: '🤝 Tie! No one is eliminated this round.',
+      senderName: '', timestamp: Date.now(),
+    });
+    const nextRound = (room.currentRound || 1) + 1;
+    await db.ref(`spyChatRooms/${roomId}`).update({
+      currentRound: nextRound, votes: null,
+    });
+    await startCluePhase(roomId, room);
+    console.log(`🕵️ Tie in ${roomId} — round ${nextRound}`);
+    return;
+  }
+
+  // Eliminate player
+  const elimName = room.players?.[eliminated]?.name || 'Unknown';
+  msgRef.set({
+    type: 'system', text: `🚪 ${elimName} was eliminated.`,
+    senderName: '', timestamp: Date.now(),
+  });
+  await db.ref(`spyChatRooms/${roomId}/players/${eliminated}/alive`).set(false);
+  await db.ref(`spyChatRooms/${roomId}/votes`).remove();
+  console.log(`🕵️ ${elimName} eliminated in ${roomId}`);
+
+  // Check win conditions
+  const alive = Object.keys(room.players || {}).filter(u => {
+    const snap = room.players?.[u];
+    return u !== eliminated && snap?.alive !== false;
+  });
+  const spies = alive.filter(u => room.players?.[u]?.role === 'spy');
+  const civilians = alive.filter(u => room.players?.[u]?.role === 'civilian');
+
+  if (spies.length === 0) {
+    await db.ref(`spyChatRooms/${roomId}`).update({ status: 'finished', winner: 'civilians' });
+    const wMsg = db.ref(`chats/spyChat_${roomId}`).push();
+    wMsg.set({ type: 'system', text: '🏆 All spies eliminated! Civilians win!', senderName: '', timestamp: Date.now() });
+    console.log(`🏆 Civilians win ${roomId}`);
+    setTimeout(() => db.ref(`spyChatRooms/${roomId}`).remove(), 2 * 60 * 60 * 1000);
+  } else if (spies.length >= civilians.length) {
+    await db.ref(`spyChatRooms/${roomId}`).update({ status: 'finished', winner: 'spies' });
+    const wMsg = db.ref(`chats/spyChat_${roomId}`).push();
+    wMsg.set({ type: 'system', text: '🏆 Spies have taken over! Spies win!', senderName: '', timestamp: Date.now() });
+    console.log(`🏆 Spies win ${roomId}`);
+    setTimeout(() => db.ref(`spyChatRooms/${roomId}`).remove(), 2 * 60 * 60 * 1000);
+  } else {
+    const nextRound = (room.currentRound || 1) + 1;
+    await db.ref(`spyChatRooms/${roomId}`).update({ currentRound: nextRound, votes: null });
+    await startCluePhase(roomId, room);
+    console.log(`🕵️ Round ${nextRound} starts in ${roomId}`);
+  }
+}
+
+// Player removal → auto-eliminate and check win condition
+db.ref('spyChatRooms').on('child_changed', async (snap) => {
+  const room = snap.val(), roomId = snap.key;
+  if (!room || room.status === 'finished' || room.status === 'waiting') return;
+
+  const prev = snap.previous.val();
+  if (!prev) return;
+
+  const prevPlayerCount = Object.keys(prev.players || {}).length;
+  const currPlayerCount = Object.keys(room.players || {}).length;
+  if (prevPlayerCount > currPlayerCount) {
+    // A player was removed (exited)
+    const leftUid = Object.keys(prev.players || {}).find(u => !room.players?.[u]);
+    if (leftUid) {
+      const name = prev.players?.[leftUid]?.name || 'Someone';
+      const mRef = db.ref(`chats/spyChat_${roomId}`).push();
+      mRef.set({ type: 'system', text: `🚪 ${name} left the game.`, senderName: '', timestamp: Date.now() });
+    }
+
+    const alive = Object.keys(room.players || {}).filter(u => room.players?.[u]?.alive !== false);
+    const spies = alive.filter(u => room.players?.[u]?.role === 'spy');
+    const civilians = alive.filter(u => room.players?.[u]?.role === 'civilian');
+
+    if (spies.length === 0) {
+      await db.ref(`spyChatRooms/${roomId}`).update({ status: 'finished', winner: 'civilians' });
+      setTimeout(() => db.ref(`spyChatRooms/${roomId}`).remove(), 2 * 60 * 60 * 1000);
+    } else if (spies.length >= civilians.length) {
+      await db.ref(`spyChatRooms/${roomId}`).update({ status: 'finished', winner: 'spies' });
+      setTimeout(() => db.ref(`spyChatRooms/${roomId}`).remove(), 2 * 60 * 60 * 1000);
+    }
+  }
+});
+
+recoverSpTimers();
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server on port ${PORT}`));
