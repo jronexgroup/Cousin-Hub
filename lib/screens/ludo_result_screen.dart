@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../app_theme.dart';
 import 'home_screen.dart';
+import '../services/badge_service.dart';
 
 class LudoResultScreen extends StatefulWidget {
   final String matchId;
@@ -30,8 +31,18 @@ class _LudoResultScreenState extends State<LudoResultScreen> {
       if (!event.snapshot.exists || !mounted) return;
       final val = event.snapshot.value;
       if (val != null) {
+        final results = Map<String, dynamic>.from(val as Map);
+        final playersData = results['players'] as Map<String, dynamic>? ?? {};
+        final players = playersData.entries.map((e) {
+          final d = Map<String, dynamic>.from(e.value as Map);
+          return _PlayerInfo(uid: e.key, name: d['name']?.toString() ?? 'Cousin', rank: d['rank'] as int? ?? 0, xp: d['xpEarned'] as int? ?? 0);
+        }).toList();
+        final winner = players.firstWhere((p) => p.rank == 1, orElse: () => _PlayerInfo(uid: '', name: '', rank: 0, xp: 0));
+        if (winner.uid.isNotEmpty) {
+          BadgeService.incrementStat(winner.uid, 'game');
+        }
         setState(() {
-          _results = Map<String, dynamic>.from(val as Map);
+          _results = results;
           _loading = false;
         });
       } else if (mounted) {

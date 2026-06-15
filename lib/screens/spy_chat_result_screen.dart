@@ -5,6 +5,7 @@ import '../app_theme.dart';
 import '../screens/home_screen.dart';
 import 'spy_chat_models.dart';
 import 'spy_chat_lobby_screen.dart';
+import '../services/badge_service.dart';
 
 class SpyChatResultScreen extends StatefulWidget {
   final String roomId, myUid, myName, myPhoto;
@@ -51,10 +52,21 @@ class _SpyChatResultScreenState extends State<SpyChatResultScreen> {
       clues.sort((a, b) => ((a['timestamp'] as num?) ?? 0).compareTo((b['timestamp'] as num?) ?? 0));
     }
 
-    if (mounted) setState(() {
-      _clueMessages = clues;
-      _loading = false;
-    });
+    if (mounted) {
+      final civWon = _roomData?['winner'] as String? == 'civilians';
+      final playersMap = _roomData?['players'] as Map? ?? {};
+      final winners = playersMap.entries.where((e) {
+        final role = (e.value as Map)['role'] as String?;
+        return civWon ? role == 'civilian' : role == 'spy';
+      });
+      for (final e in winners) {
+        BadgeService.incrementStat(e.key, 'game');
+      }
+      setState(() {
+        _clueMessages = clues;
+        _loading = false;
+      });
+    }
   }
 
   @override

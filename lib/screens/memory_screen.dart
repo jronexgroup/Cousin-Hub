@@ -9,6 +9,7 @@ import '../services/auth_service.dart';
 import '../services/cloudinary_service.dart';
 import '../services/cache_service.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/badge_service.dart';
 
 class MemoryScreen extends StatefulWidget {
   const MemoryScreen({super.key});
@@ -98,6 +99,7 @@ class _MemoryScreenState extends State<MemoryScreen> with SingleTickerProviderSt
         });
       }
     }
+    await BadgeService.incrementStat(uid, 'photo');
     setState(() { _uploading = false; _uploadProgress = 0; });
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('📸 Memories uploaded!'), backgroundColor: AppTheme.primary));

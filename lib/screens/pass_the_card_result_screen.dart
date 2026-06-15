@@ -3,6 +3,7 @@ import '../app_theme.dart';
 import '../screens/home_screen.dart';
 import 'pass_the_card_models.dart';
 import 'pass_the_card_lobby_screen.dart';
+import '../services/badge_service.dart';
 
 class PassTheCardResultScreen extends StatefulWidget {
   final List<PlayerCardData> players;
@@ -40,6 +41,7 @@ class _PassTheCardResultScreenState extends State<PassTheCardResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    BadgeService.incrementStat(widget.winnerUid, 'game');
     final isWinner = widget.winnerUid == widget.myUid;
     final winner = widget.players.firstWhere(
       (p) => p.uid == widget.winnerUid,

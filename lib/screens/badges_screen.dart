@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import '../app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/cache_service.dart';
+import '../services/badge_service.dart';
 
 // ═══════════════════════════════════════════════════════════
 // ACHIEVEMENT BADGES — Gamification system
@@ -73,20 +74,8 @@ class _BadgesScreenState extends State<BadgesScreen> {
   Future<void> _loadData() async {
     setState(() => _loading = true);
     try {
-      // Load user stats from Firebase
-      final snap = await _db.ref('userStats/$_viewUid').get();
-      if (snap.exists) {
-        _userStats = Map<String, int>.from(
-          (snap.value as Map).map((k, v) => MapEntry(k.toString(), (v as num).toInt())));
-      }
-
-      // Load earned badges
-      final badgeSnap = await _db.ref('users/$_viewUid/badges').get();
-      if (badgeSnap.exists) {
-        _earnedBadges = Set<String>.from((badgeSnap.value as Map).keys);
-      }
-
-      // Check and award new badges
+      _userStats = await BadgeService.getStats(_viewUid);
+      _earnedBadges = await BadgeService.getEarnedBadges(_viewUid);
       await _checkAndAwardBadges();
     } catch (e) { /* offline */ }
     if (mounted) setState(() => _loading = false);
@@ -103,17 +92,8 @@ class _BadgesScreenState extends State<BadgesScreen> {
   }
 
   Future<void> _checkAndAwardBadges() async {
-    final newBadges = <String>[];
-    for (final badge in kAllBadges) {
-      if (_earnedBadges.contains(badge.id)) continue;
-      final stat = _userStats[badge.type] ?? 0;
-      if (stat >= badge.requirement) {
-        newBadges.add(badge.id);
-        await _db.ref('users/$_myUid/badges/${badge.id}').set(
-          DateTime.now().millisecondsSinceEpoch);
-        _earnedBadges.add(badge.id);
-      }
-    }
+    final newBadges = await BadgeService.checkAndAward(_viewUid);
+    _earnedBadges.addAll(newBadges);
     if (newBadges.isNotEmpty && mounted) {
       _showBadgeEarned(newBadges);
     }

@@ -14,6 +14,7 @@ import 'voting_screen.dart';
 import 'eidi_screen.dart';
 import 'members_screen.dart';
 import 'admin_screen.dart';
+import 'game_list_screen.dart';
 import 'ludo_king_invite_screen.dart';
 import 'ludo_match_lobby_screen.dart';
 import 'tictactoe_invite_screen.dart';
@@ -393,19 +394,35 @@ class _HomeBody extends StatelessWidget {
         const SizedBox(height: 20),
 
         // ══ SECTION 2: Games ══
-        _sectionHeader('Games Zone 🎮'),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(children: [
+            Container(width: 4, height: 18, decoration: BoxDecoration(gradient: AppTheme.mainGradient, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(width: 8),
+            const Text('Games Zone 🎮', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppTheme.ink)),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => _go(context, const GameListScreen()),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8)),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Text('All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.primary)),
+                  SizedBox(width: 2),
+                  Icon(Icons.arrow_forward_ios, size: 10, color: AppTheme.primary),
+                ]),
+              ),
+            ),
+          ])),
         const SizedBox(height: 10),
         _grid(context, [
           _Card('🎲', 'Ludo King', Colors.deepPurple, () => _go(context, const LudoKingInviteScreen()), light: false),
-          _Card('❌', 'Tic Tac Toe', const Color(0xFF1B3A2D), () => _go(context, const TicTacToeInviteScreen()), light: false),
-          _Card('💣', 'Pass The Bomb', const Color(0xFF4A0E4E), () => _go(context, const PassTheBombLobbyScreen()), light: false),
           _Card('🎭', 'Truth or Dare', const Color(0xFF2D1B69), () => _go(context, const TruthOrDareLobbyScreen()), light: false),
           _Card('🃏', 'Pass The Card', const Color(0xFF1B3A1B), () => _go(context, const PassTheCardLobbyScreen()), light: false),
+          _Card('💣', 'Pass The Bomb', const Color(0xFF4A0E4E), () => _go(context, const PassTheBombLobbyScreen()), light: false),
+          _Card('❌', 'Tic Tac Toe', const Color(0xFF1B3A2D), () => _go(context, const TicTacToeInviteScreen()), light: false),
           _Card('🕵️', 'Spy Chat', const Color(0xFF2D1B4E), () => _go(context, const SpyChatLobbyScreen()), light: false),
-          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
-          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
-          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
-          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
           _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
           _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
         ]),

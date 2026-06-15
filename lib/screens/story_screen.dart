@@ -7,6 +7,7 @@ import '../app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/cloudinary_service.dart';
 import '../services/cache_service.dart';
+import '../services/badge_service.dart';
 
 // ═══════════════════════════════════════════════════════════
 // COUSIN HUB STORIES — Instagram/WhatsApp style
@@ -184,6 +185,7 @@ class _StoryScreenState extends State<StoryScreen> {
       'views': {},
       'likes': {},
     });
+    await BadgeService.incrementStat(_myUid, 'story');
     setState(() => _uploading = false);
   }
 
@@ -199,6 +201,7 @@ class _StoryScreenState extends State<StoryScreen> {
         'uploaderPhoto': _myPhoto, 'timestamp': ServerValue.timestamp,
         'views': {}, 'likes': {},
       });
+      await BadgeService.incrementStat(_myUid, 'story');
     }
     if (mounted) setState(() => _uploading = false);
   }

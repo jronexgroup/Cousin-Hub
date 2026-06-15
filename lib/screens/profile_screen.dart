@@ -8,6 +8,8 @@ import '../services/cloudinary_service.dart';
 import '../services/cache_service.dart';
 import 'login_screen.dart';
 import 'admin_screen.dart';
+import 'badges_screen.dart';
+import '../services/badge_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -22,6 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _memoriesCount = 0, _eventsCount = 0;
   bool _uploadingPhoto = false;
   bool _loading = true;
+  Set<String> _earnedBadges = {};
 
   @override
   void initState() {
@@ -59,9 +62,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return att[uid] == 'going';
         }).length;
       }
+      final badges = await BadgeService.getEarnedBadges(uid);
       if (mounted) setState(() {
         _memoriesCount = memSnap.exists ? (memSnap.value as Map).length : 0;
         _eventsCount = evCount;
+        _earnedBadges = badges;
       });
     } catch (e) {
       // Use cached data if available
@@ -224,6 +229,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 12),
             _stat('🎉', '$_eventsCount', 'Events'),
           ])),
+
+        const SizedBox(height: 16),
+
+        // Badges
+        if (_earnedBadges.isNotEmpty)
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BadgesScreen())),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)]),
+                child: Row(children: [
+                  Text('🏅', style: const TextStyle(fontSize: 20)),
+                  const SizedBox(width: 12),
+                  const Text('Badges', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.ink)),
+                  const Spacer(),
+                  SizedBox(
+                    height: 28,
+                    child: ListView(scrollDirection: Axis.horizontal, shrinkWrap: true,
+                      children: kAllBadges.where((b) => _earnedBadges.contains(b.id)).take(6).map((b) =>
+                        Padding(padding: const EdgeInsets.only(right: 4),
+                          child: Text(b.emoji, style: const TextStyle(fontSize: 18)))).toList()
+                        + [
+                          if (_earnedBadges.length > 6)
+                            Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: const Color(0xFFEDE9FE), borderRadius: BorderRadius.circular(100)),
+                              child: Text('+${_earnedBadges.length - 6}', style: const TextStyle(fontSize: 10, color: AppTheme.primary, fontWeight: FontWeight.w700)))
+                        ],
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.chevron_right, size: 18, color: AppTheme.soft),
+                ]),
+              ),
+            )),
 
         const SizedBox(height: 16),
 

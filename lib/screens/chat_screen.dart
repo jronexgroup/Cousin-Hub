@@ -15,6 +15,7 @@ import '../services/cloudinary_service.dart';
 import '../services/cache_service.dart';
 import 'call_screen.dart';
 import '../models/message_model.dart';
+import '../services/badge_service.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -173,6 +174,7 @@ class _ChatScreenState extends State<ChatScreen> {
       'senderUid': _myUid, 'senderName': _myName, 'senderPhoto': _myPhoto,
       'timestamp': ServerValue.timestamp, 'seenBy': {}, 'delivered': true,
     });
+    await BadgeService.incrementStat(_myUid, 'chat');
   }
 
   // ── Send image or video from gallery ──────────────────────────────────────

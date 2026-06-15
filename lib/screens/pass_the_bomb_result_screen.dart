@@ -3,6 +3,7 @@ import '../app_theme.dart';
 import 'home_screen.dart';
 import 'pass_the_bomb_lobby_screen.dart';
 import 'pass_the_bomb_models.dart';
+import '../services/badge_service.dart';
 
 class PassTheBombResultScreen extends StatefulWidget {
   final List<PlayerData> players;
@@ -48,6 +49,7 @@ class _PassTheBombResultState extends State<PassTheBombResultScreen> {
   @override
   Widget build(BuildContext context) {
     final ranked = _ranked;
+    BadgeService.incrementStat(widget.winnerUid, 'game');
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A1A),

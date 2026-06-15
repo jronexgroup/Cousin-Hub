@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../app_theme.dart';
 import 'home_screen.dart';
+import '../services/badge_service.dart';
 
 class TicTacToeResultScreen extends StatefulWidget {
   final String matchId, myUid, opponentName;
@@ -38,6 +39,7 @@ class _TicTacToeResultState extends State<TicTacToeResultScreen> {
   Widget build(BuildContext context) {
     final isWin = widget.winner == widget.myPlayer;
     final isDraw = widget.winner == -1;
+    if (isWin) BadgeService.incrementStat(widget.myUid, 'game');
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A1A),
