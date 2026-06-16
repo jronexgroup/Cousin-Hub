@@ -582,7 +582,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
 
   Widget _modStories() {
     final cutoff = DateTime.now().millisecondsSinceEpoch - 86400000;
-    final recent = _stories.where((s) => (s['timestamp'] as num?)?.toInt() ?? 0 > cutoff).toList();
+    final recent = _stories.where((s) => ((s['timestamp'] as num?)?.toInt() ?? 0) > cutoff).toList();
     return Column(children: [
       if (_storyPreview != null) _storyPreviewCard(),
       Expanded(child: ListView(padding: const EdgeInsets.all(12), children: [

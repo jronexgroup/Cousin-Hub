@@ -249,15 +249,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(
                     height: 28,
                     child: ListView(scrollDirection: Axis.horizontal, shrinkWrap: true,
-                      children: kAllBadges.where((b) => _earnedBadges.contains(b.id)).take(6).map((b) =>
-                        Padding(padding: const EdgeInsets.only(right: 4),
-                          child: Text(b.emoji, style: const TextStyle(fontSize: 18)))).toList()
-                        + [
-                          if (_earnedBadges.length > 6)
-                            Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      children: [
+                        ...kAllBadges.where((b) => _earnedBadges.contains(b.id)).take(6).map((b) =>
+                          Padding(padding: const EdgeInsets.only(right: 4),
+                            child: Text(b.emoji, style: const TextStyle(fontSize: 18)))),
+                        if (_earnedBadges.length > 6)
+                          Padding(padding: const EdgeInsets.only(right: 4),
+                            child: Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(color: const Color(0xFFEDE9FE), borderRadius: BorderRadius.circular(100)),
-                              child: Text('+${_earnedBadges.length - 6}', style: const TextStyle(fontSize: 10, color: AppTheme.primary, fontWeight: FontWeight.w700)))
-                        ],
+                              child: Text('+${_earnedBadges.length - 6}', style: const TextStyle(fontSize: 10, color: AppTheme.primary, fontWeight: FontWeight.w700)))),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 4),

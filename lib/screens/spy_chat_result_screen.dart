@@ -52,9 +52,9 @@ class _SpyChatResultScreenState extends State<SpyChatResultScreen> {
       clues.sort((a, b) => ((a['timestamp'] as num?) ?? 0).compareTo((b['timestamp'] as num?) ?? 0));
     }
 
-    if (mounted) {
-      final civWon = _roomData?['winner'] as String? == 'civilians';
-      final playersMap = _roomData?['players'] as Map? ?? {};
+    if (mounted && _roomData != null) {
+      final civWon = _roomData!['winner'] == 'civilians';
+      final playersMap = _roomData!['players'] is Map ? _roomData!['players'] as Map : <String, dynamic>{};
       final winners = playersMap.entries.where((e) {
         final role = (e.value as Map)['role'] as String?;
         return civWon ? role == 'civilian' : role == 'spy';
