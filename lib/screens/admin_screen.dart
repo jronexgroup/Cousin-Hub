@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:firebase_database/firebase_database.dart';
 import '../app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/cloudinary_service.dart';
@@ -913,14 +911,18 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
             ['🎉 Happy Eid!', 'Eid Mubarak from all of us! 🌙'],
             ['🎮 Game Time!', 'Challenge your cousins to a game!'],
             ['📲 App Update', 'A new version is available. Please update!'],
-          ].map((t) => GestureDetector(onTap: () { _notifTitleCtrl.text = t[0]; _notifBodyCtrl.text = t[1]; setState(() {}); },
-            child: Container(padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE8D9C5))),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(t[0], style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.ink)),
-                Text(t[1], style: const TextStyle(fontSize: 10, color: AppTheme.muted)),
-              ]))).toList()),
+          ].map((t) {
+            final title = t[0] as String;
+            final body = t[1] as String;
+            return GestureDetector(onTap: () { _notifTitleCtrl.text = title; _notifBodyCtrl.text = body; setState(() {}); },
+              child: Container(padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE8D9C5))),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.ink)),
+                  Text(body, style: const TextStyle(fontSize: 10, color: AppTheme.muted)),
+                ])));
+          }).toList()),
       ]),
       const SizedBox(height: 16),
       // History
@@ -1366,7 +1368,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
             _lbHeader('#'), _lbHeader('Member'), _lbHeader('Nickname'), _lbHeader('🏆 Wins'),
           ]),
           const Divider(height: 16),
-          ..._leaderboard.take(30).asMap().entries.map((entry) {
+          ..._leaderboard.take(30).toList().asMap().entries.map((entry) {
             final i = entry.key;
             final m = entry.value;
             return Padding(padding: const EdgeInsets.symmetric(vertical: 4),
@@ -1486,7 +1488,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       child: Column(children: [
         Text(emoji, style: const TextStyle(fontSize: 20)),
         Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.ink)),
-        Text(label, style: const TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.w600)),
+        Text(label, style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.w600)),
       ])));
   }
 
