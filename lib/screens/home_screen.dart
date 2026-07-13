@@ -28,6 +28,8 @@ import 'badges_screen.dart';
 import 'live_location_screen.dart';
 import 'family_storybook_screen.dart';
 import 'birthday_expense_screen.dart';
+import 'rps_lobby_screen.dart';
+import 'charades_lobby_screen.dart';
 
 // ══════════════════════════════════════════════════════════
 //  HOME SCREEN — All features visible
@@ -423,8 +425,8 @@ class _HomeBody extends StatelessWidget {
           _Card('💣', 'Pass The Bomb', const Color(0xFF4A0E4E), () => _go(context, const PassTheBombLobbyScreen()), light: false),
           _Card('❌', 'Tic Tac Toe', const Color(0xFF1B3A2D), () => _go(context, const TicTacToeInviteScreen()), light: false),
           _Card('🕵️', 'Spy Chat', const Color(0xFF2D1B4E), () => _go(context, const SpyChatLobbyScreen()), light: false),
-          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
-          _Card('🔜', 'Coming Soon', Colors.grey.shade800, null, light: false),
+          _Card('🪨📄✂️', 'RPS', const Color(0xFF1A3A5C), () => _go(context, const RpsLobbyScreen()), light: false),
+          _Card('🎭', 'Charades', const Color(0xFF5C2D1A), () => _go(context, const CharadesLobbyScreen()), light: false),
         ]),
 
         const SizedBox(height: 20),

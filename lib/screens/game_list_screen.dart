@@ -6,6 +6,8 @@ import 'pass_the_bomb_lobby_screen.dart';
 import 'pass_the_card_lobby_screen.dart';
 import 'truth_or_dare_lobby_screen.dart';
 import 'spy_chat_lobby_screen.dart';
+import 'rps_lobby_screen.dart';
+import 'charades_lobby_screen.dart';
 
 class GameListScreen extends StatelessWidget {
   const GameListScreen({super.key});
@@ -17,6 +19,8 @@ class GameListScreen extends StatelessWidget {
     _GameData('💣', 'Pass The Bomb', Color(0xFF4A0E4E), PassTheBombLobbyScreen.new),
     _GameData('❌', 'Tic Tac Toe', Color(0xFF1B3A2D), TicTacToeInviteScreen.new),
     _GameData('🕵️', 'Spy Chat', Color(0xFF2D1B4E), SpyChatLobbyScreen.new),
+    _GameData('🪨📄✂️', 'RPS', Color(0xFF1A3A5C), RpsLobbyScreen.new),
+    _GameData('🎭', 'Charades', Color(0xFF5C2D1A), CharadesLobbyScreen.new),
   ];
 
   @override
@@ -31,20 +35,14 @@ class GameListScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.ink))),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
-        itemCount: _games.length + 2,
+        itemCount: _games.length,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (_, i) {
-          if (i < _games.length) {
-            final g = _games[i];
-            return _GameCard(
-              emoji: g.emoji, name: g.name, color: g.color,
-              onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => g.screen())),
-            );
-          }
+          final g = _games[i];
           return _GameCard(
-            emoji: '🔜', name: 'Coming Soon',
-            color: Colors.grey.shade800, onTap: null,
+            emoji: g.emoji, name: g.name, color: g.color,
+            onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => g.screen())),
           );
         },
       ),
