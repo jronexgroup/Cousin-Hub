@@ -19,13 +19,13 @@ class _CharadesGameScreenState extends State<CharadesGameScreen> {
   final _clueCtrl = TextEditingController();
   final _guessCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
+  String _myName = '';
   Map<String, dynamic> _room = {};
   int _currentRound = 0;
   List<Map<String, dynamic>> _clues = [];
   List<Map<String, dynamic>> _guesses = [];
 
   String get _myUid => _auth.currentUid!;
-  String get _myName => _auth.currentName;
   String? get _secretWord => _room['secretWord'] as String?;
   String? get _actorUid => _room['actorUid'] as String?;
   bool get _isActor => _actorUid == _myUid;
@@ -35,6 +35,7 @@ class _CharadesGameScreenState extends State<CharadesGameScreen> {
   @override
   void initState() {
     super.initState();
+    _auth.getProfile(_myUid).then((p) { if (p != null && mounted) setState(() => _myName = p['nickname'] ?? p['name'] ?? 'Cousin'); });
     _db.ref('charadesRooms/${widget.roomId}').onValue.listen((e) {
       if (!e.snapshot.exists || !mounted) return;
       setState(() => _room = Map<String, dynamic>.from(e.snapshot.value as Map));

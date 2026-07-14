@@ -21,17 +21,23 @@ class _CharadesLobbyScreenState extends State<CharadesLobbyScreen> {
   bool _isHost = false, _ready = false;
   bool _creating = false;
   int _totalRounds = 8;
+  String _myName = '', _myPhoto = '';
 
   String get _myUid => _auth.currentUid!;
-  String get _myName => _auth.currentName;
 
   @override
   void initState() {
     super.initState();
+    _loadProfile();
     if (widget.inviteCode != null) {
       _codeCtrl.text = widget.inviteCode!;
       _joinRoom();
     }
+  }
+
+  Future<void> _loadProfile() async {
+    final p = await _auth.getProfile(_myUid);
+    if (p != null && mounted) setState(() { _myName = p['nickname'] ?? p['name'] ?? 'Cousin'; _myPhoto = p['photoUrl'] ?? ''; });
   }
 
   Future<void> _createRoom() async {
@@ -43,7 +49,7 @@ class _CharadesLobbyScreenState extends State<CharadesLobbyScreen> {
       'status': 'lobby',
       'createdAt': ServerValue.timestamp,
       'roomCode': _roomId!.substring(_roomId!.length - 4).toUpperCase(),
-      'players': {_myUid: {'name': _myName, 'ready': false, 'photo': _auth.currentPhoto, 'score': 0}},
+      'players': {_myUid: {'name': _myName, 'ready': false, 'photo': _myPhoto, 'score': 0}},
     });
     _isHost = true;
     _listen();

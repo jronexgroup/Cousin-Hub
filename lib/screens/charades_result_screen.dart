@@ -19,7 +19,7 @@ class _CharadesResultScreenState extends State<CharadesResultScreen> {
   void initState() {
     super.initState();
     _db.ref('charadesRooms/${widget.roomId}').once().then((s) {
-      if (s.exists && mounted) setState(() => _room = Map<String, dynamic>.from(s.value as Map));
+      if (s.snapshot.exists && mounted) setState(() => _room = Map<String, dynamic>.from(s.snapshot.value as Map));
     });
     BadgeService.incrementStat(AuthService().currentUid!, 'games');
   }

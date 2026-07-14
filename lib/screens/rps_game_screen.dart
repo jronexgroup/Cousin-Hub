@@ -15,6 +15,7 @@ class RpsGameScreen extends StatefulWidget {
 class _RpsGameScreenState extends State<RpsGameScreen> {
   final _db = FirebaseDatabase.instance;
   final _auth = AuthService();
+  String _myName = '';
   Map<String, dynamic> _room = {};
   int _round = 0;
   int _phaseTimer = 0;
@@ -22,12 +23,12 @@ class _RpsGameScreenState extends State<RpsGameScreen> {
   bool _submitted = false;
 
   String get _myUid => _auth.currentUid!;
-  String get _myName => _auth.currentName;
   bool get _isHost => _room['host'] == _myUid;
 
   @override
   void initState() {
     super.initState();
+    _auth.getProfile(_myUid).then((p) { if (p != null && mounted) setState(() => _myName = p['nickname'] ?? p['name'] ?? 'Cousin'); });
     _db.ref('rpsRooms/${widget.roomId}').onValue.listen((e) {
       if (!e.snapshot.exists || !mounted) return;
       final data = Map<String, dynamic>.from(e.snapshot.value as Map);

@@ -1612,7 +1612,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         Container(padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(color: const Color(0xFF1F2937), borderRadius: BorderRadius.circular(8)),
           child: const Text(
-            '{\n  "rules": {\n    ".read": "auth != null",\n    ".write": "auth != null",\n    "adminLogs": {\n      ".write": "auth != null && root.child(\'users\').child(auth.uid).child(\'role\').val() === \'admin\'"\n    }\n  }\n}',
+            '{\n  "rules": {\n    ".read": "auth != null",\n    ".write": "auth != null",\n    "notifications": {\n      ".indexOn": "sent"\n    },\n    "adminLogs": {\n      ".write": "auth != null && root.child(\'users\').child(auth.uid).child(\'role\').val() === \'admin\'"\n    }\n  }\n}',
             style: TextStyle(fontSize: 9, fontFamily: 'monospace', color: Color(0xFF86EFAC)),
           ),
         ),

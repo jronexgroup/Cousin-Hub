@@ -20,18 +20,23 @@ class _RpsLobbyScreenState extends State<RpsLobbyScreen> {
   Map<String, dynamic> _room = {};
   bool _isHost = false, _ready = false;
   bool _creating = false;
-  String _mode = 'bo3';
+  String _mode = 'bo3', _myName = '', _myPhoto = '';
 
   String get _myUid => _auth.currentUid!;
-  String get _myName => _auth.currentName;
 
   @override
   void initState() {
     super.initState();
+    _loadProfile();
     if (widget.inviteCode != null) {
       _codeCtrl.text = widget.inviteCode!;
       _joinRoom();
     }
+  }
+
+  Future<void> _loadProfile() async {
+    final p = await _auth.getProfile(_myUid);
+    if (p != null && mounted) setState(() { _myName = p['nickname'] ?? p['name'] ?? 'Cousin'; _myPhoto = p['photoUrl'] ?? ''; });
   }
 
   Future<void> _createRoom() async {
@@ -44,7 +49,7 @@ class _RpsLobbyScreenState extends State<RpsLobbyScreen> {
       'status': 'lobby',
       'createdAt': ServerValue.timestamp,
       'roomCode': _roomId!.substring(_roomId!.length - 4).toUpperCase(),
-      'players': {_myUid: {'name': _myName, 'ready': false, 'photo': _auth.currentPhoto}},
+      'players': {_myUid: {'name': _myName, 'ready': false, 'photo': _myPhoto}},
     });
     _isHost = true;
     _listen();

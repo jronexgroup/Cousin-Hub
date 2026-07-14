@@ -122,8 +122,7 @@ async function sendToAll(title, body, excludeUid = null) {
 // Background Task: Process queued notifications
 async function processNotifications() {
   try {
-    const snap = await db.ref('notifications')
-      .orderByChild('sent').equalTo(false).limitToFirst(20).once('value');
+    const snap = await db.ref('notifications').limitToFirst(20).once('value');
     if (!snap.exists()) return;
 
     const updates = {};
@@ -131,6 +130,7 @@ async function processNotifications() {
 
     snap.forEach(child => {
       const n = child.val();
+      if (n.sent) return;
       const key = child.key;
       updates[`notifications/${key}/sent`] = true;
       updates[`notifications/${key}/sentAt`] = Date.now();
